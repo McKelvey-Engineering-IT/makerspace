@@ -1,0 +1,33 @@
+/* red header */
+.header-container {
+    background-color: #990000; 
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .header-logo {
+    width: 50px; /* logo's width' */
+    height: auto;
+    margin-right: 20px;
+  }
+  
+  .header-text {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+  }
+  
+  .header-container {
+    background-color: #990000; /* red header background */
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    left:0;
+    margin: 0; /* make sure no margin */
+    position: fixed; 
+    width: 100%; 
+    top: 0;
+    z-index: 1000; 
+  }
+  
