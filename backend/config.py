@@ -7,6 +7,3 @@ class Settings(BaseModel):
 
     class Config:
         env_file = ".env"  # Optional: Load from .env
-
-
-settings = Settings()
