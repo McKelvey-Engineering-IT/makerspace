@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Any, AsyncGenerator, Dict
 from fastapi import APIRouter, Request, Depends
 from sse_starlette import EventSourceResponse
@@ -22,20 +23,29 @@ async def user_login(
         "isMember": False,
     }
 
-    state.flag_new_message()
+    state.logins.append(payload)
+
+    await state.flag_new_message()
 
     return payload
 
 
 @login_router.get("/check_logins")
-async def login_stream(request: Request) -> EventSourceResponse:
-    async def event_generator(
-        config: Settings = Depends(get_settings),
-        state: StateManager = Depends(get_state_manager),
-    ) -> AsyncGenerator[str, None]:
+async def login_stream(
+    request: Request,
+    config: Settings = Depends(get_settings),
+    state: StateManager = Depends(get_state_manager),
+) -> EventSourceResponse:
+    async def event_generator() -> AsyncGenerator[str, None]:
         while True:
             if await request.is_disconnected():
                 break
+
+            payload = {'data': state.logins} 
+
+            yield f"{json.dumps(payload)}"
+
+            print(payload)
 
             await asyncio.sleep(config.MESSAGE_STREAM_DELAY)
 

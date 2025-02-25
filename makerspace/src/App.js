@@ -12,17 +12,19 @@ const App = () => {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-      const eventSource = new EventSource("http://localhost:8001/check_logins");
-      const payloadTemplate = {id: "item",
-        name: `Sergio Estrada`,
-        studentId: "esergio@wustl.edu",
-        signInTime: "Today",
-        isMember: false }
-  
-      eventSource.onmessage = function(event) {
-        console.log('Received event:', event);
-        setCheckIns(checkIns => [...checkIns, payloadTemplate]);
-      }
+      const eventSource = new EventSource("http://localhost:8001/logins/check_logins");
+
+      eventSource.addEventListener("message", e => {
+        try {
+          if (e.data == "[DONE]") eventSource.close();
+          else {
+            const messageObject = JSON.parse(e.data);
+            setCheckIns(messageObject.data);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      });
 
     eventSource.onerror = (error) => {
       console.error('SSE Error:', error);

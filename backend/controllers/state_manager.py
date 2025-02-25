@@ -4,7 +4,8 @@ import asyncio
 class StateManager:
     def __init__(self):
         self.subscription = asyncio.Event()
+        self.logins = []
         
-    def flag_new_message(self):
+    async def flag_new_message(self):
         self.subscription.set()
         self.subscription.clear()
