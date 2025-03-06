@@ -12,7 +12,7 @@ const App = () => {
   const [filter, setFilter] = useState('');
 
   useEffect(() => {
-      const eventSource = new EventSource("http://localhost:8001/logins/check_logins");
+      const eventSource = new EventSource("http://localhost:32776/logins/check_logins");
 
       eventSource.addEventListener("message", e => {
         try {

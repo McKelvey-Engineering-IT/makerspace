@@ -1,0 +1,110 @@
+Bootstrap: docker
+From: python:3.11-slim
+
+%labels
+    Maintainer YourName
+    Version 1.0
+
+%files
+    /export/home/containerweb/ENGR-SVC-Makertech/makerspace_login_deployment/backend /app/backend
+    /export/home/containerweb/ENGR-SVC-Makertech/makerspace_login_deployment/frontend /app/frontend
+
+%post
+    # Print the working directory during the build process
+    echo "Building container. Current directory: $PWD"
+    
+    # Install curl, gnupg, and Node.js from the default Debian/Ubuntu repositories
+    apt-get update && apt-get install -y curl gnupg
+    apt-get install -y nodejs npm  # Install Node.js and npm from default repos
+    
+    # Verify Node.js and npm installation
+    node -v
+    npm -v
+
+    # Set up the working directory inside the container
+    mkdir -p /app
+
+    # Verify the copied files are in the correct location
+    echo "Files copied into /app:"
+    ls /app
+
+    # Install Python dependencies from the backend's requirements.txt
+    if [ -f /app/backend/requirements.txt ]; then
+        pip install --no-cache-dir -r /app/backend/requirements.txt
+    fi
+
+    # Navigate to the frontend folder, install npm dependencies, and build the React app
+    cd /app/frontend
+    if [ -f package.json ]; then
+        npm install
+        npm run build
+    fi
+
+    echo "Finished building container."
+
+%environment
+    export PYTHONUNBUFFERED=1
+    export APP_HOME=/app
+
+%startscript
+    # Print the working directory when the container starts
+    echo "Current directory inside container: $PWD"
+
+    # Start the FastAPI app
+    cd /app/backend
+    python main.py
+Bootstrap: docker
+From: python:3.11-slim
+
+%labels
+    Maintainer YourName
+    Version 1.0
+
+%files
+    /export/home/containerweb/ENGR-SVC-Makertech/makerspace_login_deployment/backend /app/backend
+    /export/home/containerweb/ENGR-SVC-Makertech/makerspace_login_deployment/frontend /app/frontend
+
+%post
+    # Print the working directory during the build process
+    echo "Building container. Current directory: $PWD"
+    
+    # Install curl, gnupg, and Node.js from the default Debian/Ubuntu repositories
+    apt-get update && apt-get install -y curl gnupg
+    apt-get install -y nodejs npm  # Install Node.js and npm from default repos
+    
+    # Verify Node.js and npm installation
+    node -v
+    npm -v
+
+    # Set up the working directory inside the container
+    mkdir -p /app
+
+    # Verify the copied files are in the correct location
+    echo "Files copied into /app:"
+    ls /app
+
+    # Install Python dependencies from the backend's requirements.txt
+    if [ -f /app/backend/requirements.txt ]; then
+        pip install --no-cache-dir -r /app/backend/requirements.txt
+    fi
+
+    # Navigate to the frontend folder, install npm dependencies, and build the React app
+    cd /app/frontend
+    if [ -f package.json ]; then
+        npm install
+        npm run build
+    fi
+
+    echo "Finished building container."
+
+%environment
+    export PYTHONUNBUFFERED=1
+    export APP_HOME=/app
+
+%startscript
+    # Print the working directory when the container starts
+    echo "Current directory inside container: $PWD"
+
+    # Start the FastAPI app
+    cd /app/backend
+    python main.py

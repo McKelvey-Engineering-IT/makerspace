@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
@@ -17,8 +18,10 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.mount("/", StaticFiles(directory="build", html=True), name="static")
-
+    frontend_build_dir = os.path.join(os.getenv("APP_HOME", "/app"), "frontend", "build")
+    
+    app.mount("/", StaticFiles(directory=frontend_build_dir, html=True), name="static")
+    
     return app
 
 
