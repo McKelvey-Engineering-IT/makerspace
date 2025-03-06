@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
 from routes.login import login_router
 import uvicorn
@@ -16,9 +17,11 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    app.mount("/", StaticFiles(directory="build", html=True), name="static")
+
     return app
 
 
 if __name__ == "__main__":
     app = create_app()
-    uvicorn.run(app, host="127.0.0.1", port=8001)
+    uvicorn.run(app, host="127.0.0.1", port=32777)

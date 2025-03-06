@@ -41,7 +41,8 @@ async def user_login(
         "activeSession": True,
     }
 
-    await db.insert_session(payload)
+    db.insert_session(payload)
+    
     await state.flag_new_message()
 
     return payload
