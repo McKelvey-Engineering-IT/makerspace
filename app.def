@@ -5,51 +5,68 @@ From: python:3.11-slim
     Maintainer YourName
     Version 1.0
 
-%files
-    /export/home/containerweb/ENGR-SVC-Makertech/makerspace_login_deployment/backend /app/backend
-    /export/home/containerweb/ENGR-SVC-Makertech/makerspace_login_deployment/frontend /app/frontend
-
 %post
     # Print the working directory during the build process
     echo "Building container. Current directory: $PWD"
     
     # Install curl, gnupg, and Node.js from the default Debian/Ubuntu repositories
     apt-get update && apt-get install -y curl gnupg
-    apt-get install -y nodejs npm  # Install Node.js and npm from default repos
+    apt-get install -y nodejs npm
     
     # Verify Node.js and npm installation
     node -v
     npm -v
 
-    # Set up the working directory inside the container
-    mkdir -p /app
-
-    # Verify the copied files are in the correct location
-    echo "Files copied into /app:"
-    ls /app
-
-    # Install Python dependencies from the backend's requirements.txt
-    if [ -f /app/backend/requirements.txt ]; then
-        pip install --no-cache-dir -r /app/backend/requirements.txt
-    fi
-
-    # Navigate to the frontend folder, install npm dependencies, and build the React app
-    cd /app/frontend
-    if [ -f package.json ]; then
-        npm install
-        npm run build
-    fi
-
+    # Create necessary directories
+    mkdir -p /app/backend
+    mkdir -p /app/frontend
+    
     echo "Finished building container."
 
 %environment
     export PYTHONUNBUFFERED=1
     export APP_HOME=/app
 
-%startscript
-    # Print the working directory when the container starts
-    echo "Current directory inside container: $PWD"
+%runscript
+    # Install CA certificates
+    apt-get update && apt-get install -y ca-certificates
+    update-ca-certificates
+
+    # Configure npm to bypass strict SSL
+    npm config set strict-ssl false
+    echo "Container starting..."
+    echo "Current directory: $PWD"
+    
+    # Check if the directories have been properly mounted
+    if [ ! -d "/app/frontend" ] || [ ! "$(ls -A /app/frontend)" ]; then
+        echo "ERROR: /app/frontend appears to be empty. Did you bind mount it correctly?"
+        exit 1
+    fi
+    
+    if [ ! -d "/app/backend" ] || [ ! "$(ls -A /app/backend)" ]; then
+        echo "ERROR: /app/backend appears to be empty. Did you bind mount it correctly?"
+        exit 1
+    fi
+    
+    # Install Python dependencies
+    echo "Installing Python dependencies..."
+    if [ -f /app/backend/requirements.txt ]; then
+        pip install --no-cache-dir -r /app/backend/requirements.txt
+    else
+        echo "WARNING: requirements.txt not found in /app/backend"
+    fi
+
+    # Build frontend
+    echo "Building frontend..."
+    cd /app/frontend
+    if [ -f package.json ]; then
+        npm install
+        npm run build
+    else
+        echo "WARNING: package.json not found in /app/frontend"
+    fi
 
     # Start the FastAPI app
+    echo "Starting backend application..."
     cd /app/backend
     python main.py
