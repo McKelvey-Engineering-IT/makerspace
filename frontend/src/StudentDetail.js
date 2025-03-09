@@ -15,7 +15,7 @@ const StudentDetail = ({ studentId }) => {
       setStudentInfo(null);
 
       const badgeapi = await fetch(
-        `http://localhost:8001/logins/retrieve_user?email=${studentId}`
+        `${process.env.REACT_APP_API_URL}/logins/retrieve_user?email=${studentId}`
       );
       
       let badges = await badgeapi.json();

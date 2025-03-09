@@ -14,7 +14,7 @@ const App = () => {
 
   useEffect(() => {
     const eventSource = new EventSource(
-      "http://localhost:8001/logins/check_logins"
+      `${process.env.REACT_APP_API_URL}/logins/check_logins`
     );
 
     eventSource.addEventListener("message", (e) => {
