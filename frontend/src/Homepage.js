@@ -1,17 +1,17 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Homepage.css';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import "./Homepage.css";
 
 //main page
 const HomePage = () => {
   const navigate = useNavigate();
 
   const goToBillingSite = () => {
-    navigate('/billing_site'); // jump to /billing_site page
+    navigate("/billing_site"); // jump to /billing_site page
   };
 
   const goToSignIn = () => {
-    navigate('/sign_in'); // jump to /sign_in page
+    navigate("/sign_in"); // jump to /sign_in page
   };
 
   return (

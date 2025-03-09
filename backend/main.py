@@ -18,13 +18,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    frontend_build_dir = os.path.join(os.getenv("APP_HOME", "/app"), "frontend", "build")
+    frontend_build_dir = os.path.join("..", "frontend", "build")
 
     app.mount("/", StaticFiles(directory=frontend_build_dir, html=True), name="static")
-    
+
     return app
 
 
 if __name__ == "__main__":
     app = create_app()
-    uvicorn.run(app, host="127.0.0.1", port=32776)
+    uvicorn.run(app, host="127.0.0.1", port=8001)
