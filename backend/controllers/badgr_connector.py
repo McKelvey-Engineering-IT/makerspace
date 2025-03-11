@@ -3,9 +3,9 @@ import requests
 
 
 class BadgrConnector:
-    def __init__(self, username, key):
+    def __init__(self, username, key, issuer=None):
         self.token = self.get_token(username, key)
-        self.issuer = self.get_issuer()
+        self.issuer = issuer if issuer else self.get_issuer()
 
     def get_issuer(self) -> str:
         if not self.token:
@@ -29,15 +29,17 @@ class BadgrConnector:
             headers={"Authorization": "Bearer " + self.token},
         )
 
-    def get_badges(self, email: str) -> list:
-        assertions = self.make_request(f"/v2/issuers/{self.issuer}/assertions")
-        assertions_data = assertions.json()["result"]
-
-        return [
-            badge
-            for badge in assertions_data
-            if badge["recipient"]["plaintextIdentity"] == email
+    def get_issues(self) -> None:
+        return self.make_request(f"/v2/issuers/{self.issuer}/assertions").json()[
+            "result"
         ]
+
+    def get_by_email(self, email: str) -> list:
+        user_data = self.make_request(
+            f"/v2/issuers/{self.issuer}/assertions?recipient={email}"
+        )
+
+        return user_data.json()["result"]
 
     def organize_badges(self, login_badges: list) -> Dict[str, Any]:
         badge_type = {"unicornBadges": [], "trainingsCompleted": []}
@@ -56,9 +58,9 @@ class BadgrConnector:
 
         return badge_type
 
-    def get_user(self, email: str) -> Dict[str, Any]:
-        badges = self.get_badges(email)
-        response = {"email": email, "isMember": False, **self.organize_badges(badges)}
+    def get_user_badges(self, email: str) -> Dict[str, Any]:
+        badges = self.get_by_email(email)
+        response = {"isMember": False, **self.organize_badges(badges)}
 
         if badges:
             response.update(

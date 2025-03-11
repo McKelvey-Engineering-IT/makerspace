@@ -16,17 +16,17 @@ const CheckInTable = ({ checkIns, onRowClick, studentId }) => {
         <div
           key={checkIn.id}
           className={`checkin-card ${
-            checkIn.isMember ? "member-card" : "nonmember-card"
-          } ${studentId === checkIn.email ? "selected-row" : ""}`}
-          onClick={() => handleClick(checkIn.email)}
+            checkIn.IsMember ? "member-card" : "nonmember-card"
+          } ${studentId === checkIn.Email ? "selected-row" : ""}`}
+          onClick={() => handleClick(checkIn.Email)}
         >
           <div className="checkin-info">
             <div className="info-top-row">
-              <div className="checkin-name">{checkIn.name}</div>
-              <div className="checkin-email">{checkIn.email}</div>
+              <div className="checkin-name">{checkIn.Name}</div>
+              <div className="checkin-email">{checkIn.Email}</div>
             </div>
             <div className="checkin-time">
-              {new Date(checkIn.signInTime).toLocaleString()}
+              {new Date(checkIn.SignInTime).toLocaleString()}
             </div>
           </div>
         </div>

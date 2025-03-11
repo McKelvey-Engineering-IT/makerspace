@@ -3,51 +3,37 @@ import json
 from typing import Any, AsyncGenerator, Dict
 from fastapi import APIRouter, Body, Request, Depends
 from sse_starlette import EventSourceResponse
-from controllers.db_base import DBBase
+from database.model.models import AccessLog, User, UserResponse
+from database.sql_controller import SQLController
 from routes.dependencies import (
     get_state_manager,
     get_settings,
-    get_database,
     get_badgr_connector,
+    get_db,
 )
 from controllers.state_manager import StateManager
 from controllers.badgr_connector import BadgrConnector
 from config import Settings
 from datetime import datetime
-import time
+from sqlalchemy.ext.asyncio import AsyncSession
 
 login_router = APIRouter(prefix="/logins", tags=["Logins"])
-
-
-@login_router.get("/logout")
-async def user_logout(
-    email: str,
-    state: StateManager = Depends(get_state_manager),
-    db: DBBase = Depends(get_database),
-) -> str:
-    email = f"{email}@wustl.edu"
-
-    record = db.find_record(email)
-    record.update({"activeSession": False})
-
-    db.update_record(email, record)
-
-    return "Record update complete"
 
 
 @login_router.get("/retrieve_user")
 async def user_badges(
     email: str,
     badgr_connect: BadgrConnector = Depends(get_badgr_connector),
-    db: DBBase = Depends(get_database),
+    db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
-    user = badgr_connect.get_user(email)
-    user_session = db.find_record(email)
+    sql_controller = SQLController(db)
+    user = badgr_connect.get_user_badges(email)
+    user_session = await sql_controller.find_user_record_by_email(email)
 
     if user["name"].lower() == "unregistered":
-        user["name"] = user_session["name"]
+        user["name"] = user_session.get("Name", "Unregistered")
 
-    return {**user, "lastSignIn": user_session["signInTime"]}
+    return {**user, **user_session}
 
 
 @login_router.post("/login")
@@ -56,45 +42,63 @@ async def user_login(
     FirstName: str = Body(...),
     LastName: str = Body(...),
     SignInTime: str = Body(...),
-    StudentID: str = Body(...),
+    StudentID: int = Body(...),
     state: StateManager = Depends(get_state_manager),
-    db: DBBase = Depends(get_database),
+    db: AsyncSession = Depends(get_db),
     badgr_connect: BadgrConnector = Depends(get_badgr_connector),
 ) -> Dict[str, Any]:
-    user = badgr_connect.get_user(Email)
+    sql_controller = SQLController(db)
+    user = badgr_connect.get_user_badges(Email)
     combined_name = f"{FirstName} {LastName}"
+    timestamp = datetime.now().timestamp() * 1000
 
     if user["name"].lower() == "unregistered":
         user["name"] = combined_name
 
-    payload = {
-        "id": StudentID,
-        "name": user["name"],
-        "email": Email,
-        "signInTime": datetime.now().timestamp() * 1000,
-        "isMember": user["isMember"],
-        "activeSession": True,
+    access_payload = {
+        "StudentID": StudentID,
+        "FirstName": FirstName,
+        "LastName": LastName,
+        "Name": combined_name,
+        "Email": Email,
+        "SignInTime": timestamp,
+        "SignInTimeExternal": SignInTime,
+        "IsMember": user["isMember"],
     }
 
-    db.insert_session(payload)
+    user_payload = {
+        "FirstName": FirstName,
+        "LastName": LastName,
+        "Name": combined_name,
+        "Email": Email,
+        "LastSignIn": timestamp,
+    }
 
+    user_insertion = User(**user_payload)
+    await sql_controller.insert_user(user_insertion)
+
+    access_insertion = AccessLog(**access_payload)
+    await sql_controller.insert_session(access_insertion)
     await state.flag_new_message()
 
-    return payload
+    return access_payload
 
 
-@login_router.get("/check_logins")
+@login_router.get("/check_logins", response_model=UserResponse)
 async def login_stream(
     request: Request,
     config: Settings = Depends(get_settings),
-    db: DBBase = Depends(get_database),
+    db: AsyncSession = Depends(get_db),
 ) -> EventSourceResponse:
+    sql_controller = SQLController(db)
+
     async def event_generator() -> AsyncGenerator[str, None]:
         while True:
             if await request.is_disconnected():
                 break
 
-            payload = {"data": db.find_all_active_sessions()}
+            response_payload = await sql_controller.find_all_sessions()
+            payload = {"data": response_payload}
 
             yield f"{json.dumps(payload)}"
 

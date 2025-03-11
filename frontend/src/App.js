@@ -23,12 +23,13 @@ const App = () => {
         else {
           const messageObject = JSON.parse(e.data);
           setCheckIns(messageObject.data);
+          console.log(messageObject.data)
 
           if (messageObject.data.length > 0 && firstLogin) {
             firstLogin = false;
             let final_entry = messageObject.data.length;
 
-            setSelectedStudentId(messageObject.data[final_entry - 1].email);
+            setSelectedStudentId(messageObject.data[final_entry - 1].Email);
           }
         }
       } catch (error) {
@@ -65,7 +66,7 @@ const App = () => {
   const applyFilters = (data) => {
     const now = new Date();
     return data.filter((checkIn) => {
-      const signInDate = new Date(checkIn.signInTime);
+      const signInDate = new Date(checkIn.SignInTime);
       if (filter === "day" && (now - signInDate) / (1000 * 60 * 60 * 24) > 1) {
         return false;
       }
@@ -85,11 +86,11 @@ const App = () => {
   const getSortedCheckIns = (data) => {
     return data.sort((a, b) => {
       if (sortType === "name") {
-        return a.name.localeCompare(b.name);
+        return a.Name.localeCompare(b.Name);
       } else if (sortType === "studentId") {
-        return a.email.localeCompare(b.studentId);
+        return a.Email.localeCompare(b.studentId);
       } else {
-        return new Date(b.signInTime) - new Date(a.signInTime);
+        return new Date(b.SignInTime) - new Date(a.SignInTime);
       }
     });
   };
@@ -98,8 +99,8 @@ const App = () => {
     applyFilters(
       checkIns.filter(
         (checkIn) =>
-          checkIn.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          checkIn.email.includes(searchTerm.toLowerCase())
+          checkIn.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          checkIn.Email.includes(searchTerm.toLowerCase())
       )
     )
   );

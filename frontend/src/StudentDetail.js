@@ -53,7 +53,7 @@ const StudentDetail = ({ studentId }) => {
                 </p>
               </div>
               <div className="badges">
-                {new Date(studentInfo.lastSignIn).toLocaleString()}
+                {new Date(studentInfo.LastSignIn).toLocaleString()}
               </div>
             </div>
             <div className="info-block badge-section">
