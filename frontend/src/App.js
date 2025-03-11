@@ -1,139 +1,77 @@
-import React, { useState, useEffect } from "react";
-import CheckInTable from "./CheckInTable";
-import StudentDetail from "./StudentDetail";
-import Header from "./Header";
+import React, { useState, useMemo } from "react";
+import CheckInTable from "./components/CheckInTable/CheckInTable";
+import StudentDetail from "./components/StudentDetail/StudentDetail";
+import Header from "./components/Header/Header";
+import useApi from "./hooks/UseApi";
 import "./App.css";
 
 const App = () => {
-  let firstLogin = true;
-  const [checkIns, setCheckIns] = useState([]);
   const [selectedStudentId, setSelectedStudentId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortType, setSortType] = useState("lastSignIn");
   const [filter, setFilter] = useState("");
+  
+  const { data: checkIns = [], loading, error } = useApi({
+    endpoint: `${process.env.REACT_APP_API_URL}/logins/check_logins`,
+    useSSE: true
+  });
 
-  useEffect(() => {
-    const eventSource = new EventSource(
-      `${process.env.REACT_APP_API_URL}/logins/check_logins`
-    );
+  React.useEffect(() => {
+    if (checkIns.length > 0 && !selectedStudentId) {
+      setSelectedStudentId(checkIns[checkIns.length - 1].Email);
+    }
+  }, [checkIns, selectedStudentId]);
 
-    eventSource.addEventListener("message", (e) => {
-      try {
-        if (e.data == "[DONE]") eventSource.close();
-        else {
-          const messageObject = JSON.parse(e.data);
-          setCheckIns(messageObject.data);
-          console.log(messageObject.data)
+  const filteredAndSortedCheckIns = useMemo(() => {
+    const filtered = checkIns.filter(checkIn => {
 
-          if (messageObject.data.length > 0 && firstLogin) {
-            firstLogin = false;
-            let final_entry = messageObject.data.length;
-
-            setSelectedStudentId(messageObject.data[final_entry - 1].Email);
-          }
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    });
-
-    eventSource.onerror = (error) => {
-      console.error("SSE Error:", error);
-      eventSource.close();
-    };
-
-    return () => {
-      eventSource.close();
-    };
-  }, []);
-
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
-  const handleSort = (e) => {
-    setSortType(e.target.value);
-  };
-
-  const handleFilterChange = (e) => {
-    setFilter(e.target.value);
-  };
-
-  const handleRowClick = (studentId) => {
-    setSelectedStudentId(studentId);
-  };
-
-  const applyFilters = (data) => {
-    const now = new Date();
-    return data.filter((checkIn) => {
+      const matchesSearch = searchTerm === "" || 
+        checkIn.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        checkIn.Email.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      if (!matchesSearch || !filter) return matchesSearch;
+      
+      const now = new Date();
       const signInDate = new Date(checkIn.SignInTime);
-      if (filter === "day" && (now - signInDate) / (1000 * 60 * 60 * 24) > 1) {
-        return false;
-      }
-      if (filter === "week" && (now - signInDate) / (1000 * 60 * 60 * 24) > 7) {
-        return false;
-      }
-      if (
-        filter === "month" &&
-        (now - signInDate) / (1000 * 60 * 60 * 24) > 30
-      ) {
-        return false;
-      }
-      return true;
+      const daysDiff = (now - signInDate) / (1000 * 60 * 60 * 24);
+      
+      return daysDiff <= (filter === "day" ? 1 : filter === "week" ? 7 : 30);
     });
-  };
-  //sort check in tables
-  const getSortedCheckIns = (data) => {
-    return data.sort((a, b) => {
-      if (sortType === "name") {
-        return a.Name.localeCompare(b.Name);
-      } else if (sortType === "studentId") {
-        return a.Email.localeCompare(b.studentId);
-      } else {
-        return new Date(b.SignInTime) - new Date(a.SignInTime);
-      }
+    
+    return [...filtered].sort((a, b) => {
+      if (sortType === "name") return a.Name.localeCompare(b.Name);
+      if (sortType === "studentId") return a.Email.localeCompare(b.Email);
+      return new Date(b.SignInTime) - new Date(a.SignInTime);
     });
-  };
-  //filter
-  const filteredAndSortedCheckIns = getSortedCheckIns(
-    applyFilters(
-      checkIns.filter(
-        (checkIn) =>
-          checkIn.Name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          checkIn.Email.includes(searchTerm.toLowerCase())
-      )
-    )
-  );
+  }, [checkIns, searchTerm, filter, sortType]);
+
+  if (error) return <div className="error">Error loading data</div>;
 
   return (
     <div className="app-container">
       <Header />
-      {/* <h1 value = "2b" >Member Check In</h1> */}
       <div className="main-content">
-        {/* left side CheckInTable */}
         <div className="left-panel">
           <div className="search-sort-filter-container">
-            <h1 value="2b">Member Check In</h1>
+            <h1>Member Check In</h1>
             <div className="search-bar">
               <input
                 type="text"
                 className="search-box"
                 placeholder="Search by Name, Email"
                 value={searchTerm}
-                onChange={handleSearch}
+                onChange={e => setSearchTerm(e.target.value)}
               />
-              {/* sort */}
               <div className="controls-container">
                 <div className="sort-control">
-                  <select value={sortType} onChange={handleSort}>
+                  <select value={sortType} onChange={e => setSortType(e.target.value)}>
                     <option value="lastSignIn">Sort by: Last Sign In</option>
                     <option value="name">Sort by: Name</option>
                     <option value="studentId">Sort by: Email</option>
                   </select>
                 </div>
-                {/* filter */}
                 <div className="filter-control">
-                  <select value={filter} onChange={handleFilterChange}>
+                  <select value={filter} onChange={e => setFilter(e.target.value)}>
                     <option value="">No Filter</option>
                     <option value="day">Filter: Last Day</option>
                     <option value="week">Filter: Last Week</option>
@@ -143,19 +81,20 @@ const App = () => {
               </div>
             </div>
           </div>
-          {/* check in table */}
-          <CheckInTable
-            checkIns={filteredAndSortedCheckIns}
-            onRowClick={handleRowClick}
-            studentId={selectedStudentId}
-          />
-          <p>
-            Total Number of Sign-ins in Selected Time Range:{" "}
-            {filteredAndSortedCheckIns.length}
-          </p>
+          {loading ? (
+            <div className="loading">Loading...</div>
+          ) : (
+            <>
+              <CheckInTable
+                checkIns={filteredAndSortedCheckIns}
+                onRowClick={setSelectedStudentId}
+                studentId={selectedStudentId}
+              />
+              <p>Total Sign-ins: {filteredAndSortedCheckIns.length}</p>
+            </>
+          )}
         </div>
 
-        {/* right side StudentDetail */}
         <div className="right-panel">
           {selectedStudentId ? (
             <StudentDetail studentId={selectedStudentId} />
