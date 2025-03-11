@@ -10,54 +10,44 @@ class User(Base):
     __tablename__ = "users"
 
     Email = Column(String, primary_key=True)
-    Name = Column(String)
     FirstName = Column(String)
     LastName = Column(String)
-    LastSignIn = Column(Float)
+    StudentID = Column(String)
 
     access_logs = relationship("AccessLog", back_populates="user")
-    badge_snapshot = relationship("BadgeSnapshot", back_populates="user", uselist=False)
-
 
 class AccessLog(Base):
     __tablename__ = "access_log"
 
     ID = Column(Integer, primary_key=True, autoincrement=True)
     Email = Column(String, ForeignKey("users.Email"))
-    Name = Column(String)
-    FirstName = Column(String)
-    LastName = Column(String)
-    StudentID = Column(String)
     SignInTimeExternal = Column(String)
     SignInTime = Column(Float)
     IsMember = Column(Boolean)
 
     user = relationship("User", back_populates="access_logs")
+    badge_snapshot = relationship("BadgeSnapshot", back_populates="access_log")
 
 
 class BadgeSnapshot(Base):
     __tablename__ = "badge_snapshot"
 
-    Email = Column(String, ForeignKey("users.Email"), primary_key=True)
-    Badges = Column(String)
+    ID = Column(Integer, primary_key=True, autoincrement=True)
+    Narrative_Detail = Column(String)
+    Narrative_Title = Column(String)
+    IssuedOn = Column(String)
+    Revoked = Column(Boolean)
+    Revocation_Reason = Column(String),
+    BadgeClass = Column(String)
+    ImagePath = Column(String)
+    AccessLogID = Column(String, ForeignKey("access_log.ID"))
 
-    user = relationship("User", back_populates="badge_snapshot")
+    access_log = relationship("AccessLog", back_populates="badge_snapshot")
 
 
-class UserResponse(BaseModel):
-    Name: str
+class LoginRequest(BaseModel):
     Email: str
-    LastSignIn: float
-
-    class Config:
-        from_attributes = True
-
-
-class AccessLogResponse(BaseModel):
-    Name: str
-    Email: str
-    SignInTime: float
-    IsMember: bool
-
-    class Config:
-        from_attributes = True
+    FirstName: str
+    LastName: str
+    SignInTime: str
+    StudentID: int

@@ -1,9 +1,10 @@
 import asyncio
 import json
 from typing import Any, AsyncGenerator, Dict
-from fastapi import APIRouter, Body, Request, Depends
+from fastapi import APIRouter, Request, Depends
 from sse_starlette import EventSourceResponse
-from database.model.models import AccessLog, User, UserResponse
+from database.response_builder import ResponseBuilder
+from database.model.models import AccessLog, LoginRequest, User
 from database.sql_controller import SQLController
 from routes.dependencies import (
     get_state_manager,
@@ -27,64 +28,45 @@ async def user_badges(
     db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
     sql_controller = SQLController(db)
-    user = badgr_connect.get_user_badges(email)
-    user_session = await sql_controller.find_user_record_by_email(email)
 
-    if user["name"].lower() == "unregistered":
-        user["name"] = user_session.get("Name", "Unregistered")
+    badgr_data = badgr_connect.get_user_badges(email)
+    user, session = await sql_controller.get_user_and_most_recent_session(email)
 
-    return {**user, **user_session}
+    return {**badgr_data, **ResponseBuilder.UserBasics(user, session)}
 
 
 @login_router.post("/login")
 async def user_login(
-    Email: str = Body(...),
-    FirstName: str = Body(...),
-    LastName: str = Body(...),
-    SignInTime: str = Body(...),
-    StudentID: int = Body(...),
+    login_request: LoginRequest,
     state: StateManager = Depends(get_state_manager),
     db: AsyncSession = Depends(get_db),
     badgr_connect: BadgrConnector = Depends(get_badgr_connector),
 ) -> Dict[str, Any]:
     sql_controller = SQLController(db)
-    user = badgr_connect.get_user_badges(Email)
-    combined_name = f"{FirstName} {LastName}"
-    timestamp = datetime.now().timestamp() * 1000
-
-    if user["name"].lower() == "unregistered":
-        user["name"] = combined_name
+    badgr_data = badgr_connect.get_user_badges(login_request.Email)
 
     access_payload = {
-        "StudentID": StudentID,
-        "FirstName": FirstName,
-        "LastName": LastName,
-        "Name": combined_name,
-        "Email": Email,
-        "SignInTime": timestamp,
-        "SignInTimeExternal": SignInTime,
-        "IsMember": user["isMember"],
+        "Email": login_request.Email,
+        "SignInTime": datetime.now().timestamp() * 1000,
+        "SignInTimeExternal": login_request.SignInTime,
+        "IsMember": badgr_data["isMember"],
     }
 
     user_payload = {
-        "FirstName": FirstName,
-        "LastName": LastName,
-        "Name": combined_name,
-        "Email": Email,
-        "LastSignIn": timestamp,
+        "Email": login_request.Email,
+        "FirstName": login_request.FirstName,
+        "LastName": login_request.LastName,
+        "StudentID": login_request.StudentID,
     }
 
-    user_insertion = User(**user_payload)
-    await sql_controller.insert_user(user_insertion)
-
-    access_insertion = AccessLog(**access_payload)
-    await sql_controller.insert_session(access_insertion)
+    await sql_controller.insert_user(User(**user_payload))
+    await sql_controller.insert_session(AccessLog(**access_payload))
     await state.flag_new_message()
 
     return access_payload
 
 
-@login_router.get("/check_logins", response_model=UserResponse)
+@login_router.get("/check_logins")
 async def login_stream(
     request: Request,
     config: Settings = Depends(get_settings),
@@ -98,7 +80,12 @@ async def login_stream(
                 break
 
             response_payload = await sql_controller.find_all_sessions()
-            payload = {"data": response_payload}
+            payload = {
+                "data": [
+                    ResponseBuilder.UserBasics(log.user, log)
+                    for log in response_payload
+                ]
+            }
 
             yield f"{json.dumps(payload)}"
 

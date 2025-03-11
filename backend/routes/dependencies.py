@@ -12,7 +12,7 @@ DATABASE_URL = "mysql+aiomysql://newuser:@127.0.0.1/test_database"
 state_manager = StateManager()
 badgr_connector = BadgrConnector(USERNAME, KEY)
 engine = create_async_engine(DATABASE_URL, poolclass=NullPool)
-SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=True)
+SessionLocal = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def get_db():

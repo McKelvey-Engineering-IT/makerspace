@@ -1,7 +1,7 @@
-from typing import Any, Dict, Optional
-
+from typing import Any
 from sqlalchemy import select, text
-from database.model.models import AccessLog, AccessLogResponse, User, UserResponse
+from sqlalchemy.orm import selectinload, joinedload
+from database.model.models import AccessLog, User
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -11,7 +11,7 @@ class SQLController:
 
     async def create_record(self, record: Any) -> None:
         self.db.add(record)
-        
+
         await self.db.commit()
 
     async def _find_records_by_text(self, query: str) -> list:
@@ -19,31 +19,37 @@ class SQLController:
 
         return [dict(row) for row in result.fetchall()]
 
-    async def find_user_record_by_email(self, email: str) -> Optional[User]:
+    async def get_user_and_most_recent_session(
+        self, email: str
+    ) -> tuple[User, AccessLog]:
+        user_query = await self.db.execute(
+            select(User)
+            .filter(User.Email == email)
+            .options(selectinload(User.access_logs))
+        )
+
+        user = user_query.scalar_one_or_none()
+
+        if user is None:
+            return None, None
+
+        latest_log = max(user.access_logs, key=lambda log: log.SignInTime, default=None)
+
+        return user, latest_log
+
+    async def find_all_sessions(self) -> list[AccessLog]:
         async with self.db.begin():
-            results = await self.db.execute(select(User).filter(User.Email == email))
+            results = await self.db.execute(
+                select(AccessLog).options(joinedload(AccessLog.user))
+            )
 
-            response = results.scalar_one_or_none()
-
-            if not response:
-                return None
-
-            return UserResponse.model_validate(response).model_dump()
-
-    async def find_all_sessions(self) -> list:
-        async with self.db.begin():
-            results = await self.db.execute(select(AccessLog))
-            users = results.scalars().all()
-
-            return [
-                AccessLogResponse.model_validate(user).model_dump() for user in users
-            ]
+            return results.scalars().all()
 
     async def insert_session(self, session_attempt: AccessLog) -> None:
         await self.create_record(session_attempt)
 
     async def insert_user(self, user: User) -> None:
-        user_record = await self.find_user_record_by_email(user.Email)
+        user_record, session = await self.get_user_and_most_recent_session(user.Email)
 
         if user_record:
             return
