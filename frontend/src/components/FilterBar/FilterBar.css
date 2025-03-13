@@ -1,0 +1,111 @@
+.filter-bar {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  transition: box-shadow 0.3s ease;
+}
+
+.filter-bar:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.filter-bar-header {
+  background-color: #f5f7fa;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #eaedf2;
+}
+
+.filter-bar-header h3 {
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.filter-bar-content {
+  padding: 1.5rem;
+}
+
+.search-container {
+  position: relative;
+  margin-bottom: 1.25rem;
+}
+
+.search-box {
+  width: 95%;
+  padding: 0.75rem 1rem 0.75rem 1rem;
+  border: 1px solid #dfe3e9;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  color: #495057;
+  background-color: #f8f9fa;
+}
+
+.search-box:focus {
+  outline: none;
+  border-color: #4a90e2;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+}
+
+.search-box::placeholder {
+  color: #adb5bd;
+}
+
+.dropdown-container {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.dropdown-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.dropdown-wrapper label {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #6c757d;
+  margin-bottom: 0.4rem;
+}
+
+.dropdown {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 1px solid #dfe3e9;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: #f8f9fa;
+  color: #495057;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 0.85rem;
+}
+
+.dropdown:focus {
+  outline: none;
+  border-color: #4a90e2;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+}
+
+.dropdown.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: #e9ecef;
+}
+
+@media (max-width: 768px) {
+  .dropdown-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}

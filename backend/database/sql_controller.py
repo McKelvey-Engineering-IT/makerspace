@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Union
 from sqlalchemy import select, text
 from sqlalchemy.orm import selectinload, joinedload
 from database.model.models import AccessLog, User
@@ -9,15 +9,10 @@ class SQLController:
     def __init__(self, db: AsyncSession):
         self.db = db
 
-    async def create_record(self, record: Any) -> None:
+    async def create_record(self, record: Union[User, AccessLog]) -> None:
         self.db.add(record)
 
         await self.db.commit()
-
-    async def _find_records_by_text(self, query: str) -> list:
-        result = await self.db.execute(text(query))
-
-        return [dict(row) for row in result.fetchall()]
 
     async def get_user_and_most_recent_session(
         self, email: str
@@ -45,8 +40,29 @@ class SQLController:
 
             return results.scalars().all()
 
+    async def find_most_recent_sessions(self) -> list[AccessLog]:
+        async with self.db.begin():
+            results = await self.db.execute(
+                select(AccessLog)
+                .options(joinedload(AccessLog.user))
+                .order_by(AccessLog.SignInTime.desc())
+                .limit(20)
+            )
+
+            return results.scalars().all()
+
     async def insert_session(self, session_attempt: AccessLog) -> None:
         await self.create_record(session_attempt)
+
+    async def find_session_by_timestamp(self, start_time) -> list[AccessLog]:
+        async with self.db.begin():
+            results = await self.db.execute(
+                select(AccessLog)
+                .options(joinedload(AccessLog.user))
+                .filter(AccessLog.SignInTime >= start_time)
+            )
+
+            return results.scalars().all()
 
     async def insert_user(self, user: User) -> None:
         user_record, session = await self.get_user_and_most_recent_session(user.Email)

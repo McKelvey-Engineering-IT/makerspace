@@ -47,7 +47,7 @@ const useApi = ({ endpoint, method = "GET", useSSE = false, body = null }) => {
           if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
           const result = await response.json();
-          setData(result.data || []);
+          setData(result || []);
         } catch (err) {
           setError(err);
         } finally {

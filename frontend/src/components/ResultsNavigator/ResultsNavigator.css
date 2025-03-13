@@ -1,0 +1,86 @@
+.records-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.records-count {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+    padding: 0.5rem 0;
+    letter-spacing: 0.01em;
+    display: inline-flex;
+    align-items: center;
+  }
+
+.dropdowns {
+  display: flex;
+  gap: 1rem;
+}
+
+.records-per-page,
+.page-select-dropdown {
+  min-width: 80px;
+}
+
+.page-selector {
+  display: flex;
+  align-items: center;
+}
+
+.MuiInputLabel-root {
+  font-size: 1rem; /* Increase label font size */
+  font-weight: bold;
+}
+
+.MuiPagination-root {
+  margin-top: 1rem;
+}
+/* Add to ResultsNavigator.css */
+.pagination-controls {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  @media (max-width: 768px) {
+    .pagination-controls {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+  .new-records-chip {
+    border-radius: 16px;
+    padding: 0 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .new-records-chip:hover {
+    background-color: rgba(25, 118, 210, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  }
+  
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(25, 118, 210, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 6px rgba(25, 118, 210, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(25, 118, 210, 0);
+    }
+  }
+  
+  .pulse-animation {
+    animation: pulse 2s infinite;
+  }

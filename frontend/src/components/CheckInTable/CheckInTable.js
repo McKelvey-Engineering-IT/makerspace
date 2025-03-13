@@ -1,15 +1,18 @@
-import React from "react";
-import "./CheckInTable.css"
+import React, { useContext } from "react";
+import { AppContext } from "../../AppContext";
+import "./CheckInTable.css";
 
-const CheckInTable = ({ checkIns, onRowClick, studentId }) => {
+const CheckInTable = () => {
+  const { recordsInView, selectedStudent, setSelectedStudent } = useContext(AppContext);
+
   return (
     <div className="checkin-list">
-      {checkIns.map(({ id, Name, Email, IsMember, SignInTime }) => (
+      {recordsInView.map(({ id, Name, Email, IsMember, SignInTime }) => (
         <div
           key={id}
           className={`checkin-card ${IsMember ? "member-card" : "nonmember-card"} 
-                      ${studentId === Email ? "selected-row" : ""}`}
-          onClick={() => onRowClick(Email)}
+                      ${selectedStudent === Email ? "selected-row" : ""}`}
+          onClick={() => setSelectedStudent(Email)}
         >
           <div className="checkin-info">
             <div className="info-top-row">

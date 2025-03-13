@@ -1,22 +1,18 @@
-import asyncio
-import json
-from typing import Any, AsyncGenerator, Dict
-from fastapi import APIRouter, Request, Depends
-from sse_starlette import EventSourceResponse
+from typing import Any, Dict
+from fastapi import APIRouter, Body, Request, Depends
 from database.response_builder import ResponseBuilder
 from database.model.models import AccessLog, LoginRequest, User
 from database.sql_controller import SQLController
 from routes.dependencies import (
     get_state_manager,
-    get_settings,
     get_badgr_connector,
     get_db,
 )
 from controllers.state_manager import StateManager
 from controllers.badgr_connector import BadgrConnector
-from config import Settings
-from datetime import datetime
+from datetime import datetime, time, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
+import time
 
 login_router = APIRouter(prefix="/logins", tags=["Logins"])
 
@@ -33,6 +29,33 @@ async def user_badges(
     user, session = await sql_controller.get_user_and_most_recent_session(email)
 
     return {**badgr_data, **ResponseBuilder.UserBasics(user, session)}
+
+
+@login_router.get("/historical")
+async def historical_lookup(
+    timeFilter: str,
+    db: AsyncSession = Depends(get_db),
+) -> Dict[str, Any]:
+    sql_controller = SQLController(db)
+    TIME_FRAMES = {
+        "day": timedelta(days=1),
+        "week": timedelta(weeks=1),
+        "month": timedelta(days=30),
+    }
+
+    if timeFilter not in TIME_FRAMES:
+        raise ValueError("Invalid timeframe. Choose 'day', 'week', or 'month'.")
+
+    now = int(time.time() * 1000)
+    time_delta = TIME_FRAMES[timeFilter]
+    start_time = now - (time_delta.total_seconds() * 1000)
+
+    query_results = await sql_controller.find_session_by_timestamp(start_time)
+
+    return {
+        "data": [ResponseBuilder.UserBasics(log.user, log) for log in query_results],
+        "last_checkin": datetime.now().timestamp() * 1000,
+    }
 
 
 @login_router.post("/login")
@@ -61,34 +84,29 @@ async def user_login(
 
     await sql_controller.insert_user(User(**user_payload))
     await sql_controller.insert_session(AccessLog(**access_payload))
+
+    user, log = await sql_controller.get_user_and_most_recent_session(
+        login_request.Email
+    )
+    state.logins.append(ResponseBuilder.UserBasics(user, log))
+
     await state.flag_new_message()
 
     return access_payload
 
 
-@login_router.get("/check_logins")
+@login_router.post("/check_logins")
 async def login_stream(
-    request: Request,
-    config: Settings = Depends(get_settings),
+    start_time = Body(...),
     db: AsyncSession = Depends(get_db),
-) -> EventSourceResponse:
+) -> Dict[str, Any]:
+    print(start_time)
     sql_controller = SQLController(db)
+    results = await sql_controller.find_session_by_timestamp(
+        start_time['start_time']
+    )
 
-    async def event_generator() -> AsyncGenerator[str, None]:
-        while True:
-            if await request.is_disconnected():
-                break
-
-            response_payload = await sql_controller.find_all_sessions()
-            payload = {
-                "data": [
-                    ResponseBuilder.UserBasics(log.user, log)
-                    for log in response_payload
-                ]
-            }
-
-            yield f"{json.dumps(payload)}"
-
-            await asyncio.sleep(config.MESSAGE_STREAM_DELAY)
-
-    return EventSourceResponse(event_generator())
+    return {
+        "data": [ResponseBuilder.UserBasics(log.user, log) for log in results],
+        "last_checkin": datetime.now().timestamp() * 1000,
+    }

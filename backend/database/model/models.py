@@ -16,6 +16,7 @@ class User(Base):
 
     access_logs = relationship("AccessLog", back_populates="user")
 
+
 class AccessLog(Base):
     __tablename__ = "access_log"
 
@@ -37,7 +38,7 @@ class BadgeSnapshot(Base):
     Narrative_Title = Column(String)
     IssuedOn = Column(String)
     Revoked = Column(Boolean)
-    Revocation_Reason = Column(String),
+    Revocation_Reason = (Column(String),)
     BadgeClass = Column(String)
     ImagePath = Column(String)
     AccessLogID = Column(String, ForeignKey("access_log.ID"))
