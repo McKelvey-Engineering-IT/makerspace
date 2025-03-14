@@ -7,8 +7,9 @@ import {
   FaListAlt,
   FaUserCircle,
 } from "react-icons/fa";
+import InfoSection from "./InfoSection";
 
-const StudentDetail = ({ studentId }) => {
+const StudentDetail = () => {
   const [studentInfo, setStudentInfo] = useState(null);
   const { selectedStudent } = useContext(AppContext);
 
@@ -58,59 +59,18 @@ const StudentDetail = ({ studentId }) => {
                 {new Date(studentInfo.LastSignIn).toLocaleString()}
               </div>
             </div>
-            <div className="info-block badge-section">
-              <div className="info-block-header">
-                <FaListAlt className="info-icon" />
-                <p>
-                  <strong>Tags:</strong>{" "}
-                </p>
-              </div>
-              <div className="badges">
-                {studentInfo.tags.map((tag, index) => (
-                  <div key={index} className="badge-icon">
-                    <p>
-                      <b>{tag.toUpperCase()}</b>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="info-block badge-section">
-              <div className="info-block-header">
-                <FaCrown className="info-icon" />
-                <p>
-                  <strong>Trainings Completed:</strong>
-                </p>
-              </div>
-              <div className="badges">
-                {studentInfo.trainingsCompleted.map((badge, index) => (
-                  <div key={index} className="badge-icon">
-                    <img src={badge.image} height="72" width="72" />
-                    <p>
-                      <b>{badge.name}</b>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="info-block badge-section">
-              <div className="info-block-header">
-                <FaCrown className="info-icon" />
-                <p>
-                  <strong>Unicorn Badges:</strong>
-                </p>
-              </div>
-              <div className="badges">
-                {studentInfo.unicornBadges.map((badge, index) => (
-                  <div key={index} className="badge-icon">
-                    <img src={badge.image} height="72" width="72" />
-                    <p>
-                      <b>{badge.name}</b>
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <InfoSection
+              title="Trainings Completed"
+              icon={FaCrown}
+              payload={studentInfo.trainingsCompleted}
+              isImage
+            />
+            <InfoSection
+              title="Unicorn Badges"
+              icon={FaCrown}
+              payload={studentInfo.unicornBadges}
+              isImage
+            />
           </div>
         )}
       </div>
