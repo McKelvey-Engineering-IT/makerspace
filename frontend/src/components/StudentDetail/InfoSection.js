@@ -16,9 +16,9 @@ const InfoSection = ({ title, icon: Icon, payload, isImage }) => {
           <div key={index} className="badge-icon">
             {isImage ? (
               <>
-                <img src={item.image} height="72" width="72" alt={item.name} />
+                <img src={item.ImageURL} height="72" width="72" />
                 <p>
-                  <b>{item.name}</b>
+                  <b>{item.Narrative_Detail}</b>
                 </p>
               </>
             ) : (

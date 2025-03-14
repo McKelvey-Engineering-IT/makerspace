@@ -26,10 +26,11 @@ CREATE TABLE badge_snapshot (
     Narrative_Detail VARCHAR(255),
     Narrative_Title VARCHAR(255),
     IssuedOn VARCHAR(255),
+    CreatedAt VARCHAR(255),
     Revoked BOOLEAN,
     Revocation_Reason VARCHAR(255),
     BadgeClass VARCHAR(255),
-    ImagePath VARCHAR(255),
+    ImageURL VARCHAR(255),
     AccessLogID INT,
     FOREIGN KEY (AccessLogID) REFERENCES access_log(ID)
 );

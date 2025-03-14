@@ -42,10 +42,10 @@ const StudentDetail = () => {
               <h3>{studentInfo.Email}</h3>
               <p
                 className={`member-status ${
-                  studentInfo.isMember ? "member" : "non-member"
+                  studentInfo.IsMember ? "member" : "non-member"
                 }`}
               >
-                {studentInfo.isMember ? "Member" : "Non-member"}
+                {studentInfo.IsMember ? "Member" : "Non-member"}
               </p>
             </div>
             <div className="info-block badge-section">

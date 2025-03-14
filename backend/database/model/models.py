@@ -37,11 +37,12 @@ class BadgeSnapshot(Base):
     Narrative_Detail = Column(String)
     Narrative_Title = Column(String)
     IssuedOn = Column(String)
+    CreatedAt = Column(String)
     Revoked = Column(Boolean)
-    Revocation_Reason = (Column(String),)
+    Revocation_Reason = Column(String)
     BadgeClass = Column(String)
-    ImagePath = Column(String)
-    AccessLogID = Column(String, ForeignKey("access_log.ID"))
+    ImageURL = Column(String)
+    AccessLogID = Column(Integer, ForeignKey("access_log.ID"))
 
     access_log = relationship("AccessLog", back_populates="badge_snapshot")
 

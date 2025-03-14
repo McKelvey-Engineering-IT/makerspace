@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 from database.model.models import AccessLog, User
 
 
@@ -14,4 +14,17 @@ class ResponseBuilder:
             "IsMember": access_log.IsMember,
             "LastSignIn": access_log.SignInTime,
             "LogID": access_log.ID,
+        }
+
+    def BadgeToDatabase(badge: Dict[str, Any], log_id: int) -> Dict[str, Any]:
+        return {
+            "Narrative_Detail": badge.get("description"),
+            "Narrative_Title": badge.get("name"),
+            "CreatedAt": badge.get("createdAt"),
+            "IssuedOn": badge.get("issuedOn"),
+            "Revoked": badge.get("revoked"),
+            "RevocationReason": badge.get("revocationReason"),
+            "BadgeClass": badge.get("badgeClass"),
+            "ImageURL": badge.get("image"),
+            "AccessLogID": log_id,
         }

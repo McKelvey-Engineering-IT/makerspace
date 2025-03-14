@@ -1,7 +1,7 @@
 from typing import Any, Union
-from sqlalchemy import select, text
+from sqlalchemy import insert, select, text
 from sqlalchemy.orm import selectinload, joinedload
-from database.model.models import AccessLog, User
+from database.model.models import AccessLog, BadgeSnapshot, User
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -51,10 +51,14 @@ class SQLController:
 
             return results.scalars().all()
 
-    async def insert_session(self, session_attempt: AccessLog) -> None:
+    async def insert_session(self, session_attempt: AccessLog) -> int:
         await self.create_record(session_attempt)
 
-    async def find_sessions_by_timestamp(self, start_time) -> tuple[list[AccessLog], int]:
+        return session_attempt.ID
+
+    async def find_sessions_by_timestamp(
+        self, start_time
+    ) -> tuple[list[AccessLog], int]:
         async with self.db.begin():
             results = await self.db.execute(
                 select(AccessLog)
@@ -74,7 +78,7 @@ class SQLController:
                 .options(joinedload(AccessLog.user))
                 .filter(AccessLog.ID > starting_id)
             )
-        
+
             result = results.scalars().all()
             lastEntry = result[-1].ID if result else starting_id
 
@@ -87,3 +91,9 @@ class SQLController:
             return
 
         await self.create_record(user)
+
+    async def badge_snapshot_insert(self, records: list[BadgeSnapshot]) -> None:
+        async with self.db.begin():
+            self.db.add_all(records)
+            
+            await self.db.commit()

@@ -1,7 +1,7 @@
 from typing import Any, Dict
 from fastapi import APIRouter, Body, Depends
 from database.response_builder import ResponseBuilder
-from database.model.models import AccessLog, LoginRequest, User
+from database.model.models import AccessLog, BadgeSnapshot, LoginRequest, User
 from database.sql_controller import SQLController
 from routes.dependencies import (
     get_state_manager,
@@ -12,6 +12,7 @@ from controllers.state_manager import StateManager
 from controllers.badgr_connector import BadgrConnector
 from datetime import datetime, time, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
+from controllers.badgr_session import BadgrSession
 import time
 
 login_router = APIRouter(prefix="/logins", tags=["Logins"])
@@ -25,10 +26,10 @@ async def user_badges(
 ) -> Dict[str, Any]:
     sql_controller = SQLController(db)
 
-    badgr_data = badgr_connect.get_user_badges(email)
+    badgr_session_data = BadgrSession(email, badgr_connect, "t-3QAkVuTTC7U3lah6ssCg").get_user_badges()
     user, session = await sql_controller.get_user_and_most_recent_session(email)
 
-    return {**badgr_data, **ResponseBuilder.UserBasics(user, session)}
+    return {**badgr_session_data, **ResponseBuilder.UserBasics(user, session)}
 
 
 @login_router.get("/historical")
@@ -41,7 +42,7 @@ async def historical_lookup(
         "day": timedelta(days=1),
         "week": timedelta(weeks=1),
         "month": timedelta(days=30),
-        "full": timedelta(days=365*5),
+        "full": timedelta(days=365 * 5),
     }
 
     if timeFilter not in TIME_FRAMES:
@@ -51,7 +52,9 @@ async def historical_lookup(
     time_delta = TIME_FRAMES[timeFilter]
     start_time = now - (time_delta.total_seconds() * 1000)
 
-    query_results, last_result_id = await sql_controller.find_sessions_by_timestamp(start_time)
+    query_results, last_result_id = await sql_controller.find_sessions_by_timestamp(
+        start_time
+    )
 
     return {
         "data": [ResponseBuilder.UserBasics(log.user, log) for log in query_results],
@@ -67,13 +70,13 @@ async def user_login(
     badgr_connect: BadgrConnector = Depends(get_badgr_connector),
 ) -> Dict[str, Any]:
     sql_controller = SQLController(db)
-    badgr_data = badgr_connect.get_user_badges(login_request.Email)
+    badgr_session = BadgrSession(login_request.Email, badgr_connect, "t-3QAkVuTTC7U3lah6ssCg")
 
     access_payload = {
         "Email": login_request.Email,
         "SignInTime": datetime.now().timestamp() * 1000,
         "SignInTimeExternal": login_request.SignInTime,
-        "IsMember": badgr_data["isMember"],
+        "IsMember": badgr_session.member_status,
     }
 
     user_payload = {
@@ -84,7 +87,13 @@ async def user_login(
     }
 
     await sql_controller.insert_user(User(**user_payload))
-    await sql_controller.insert_session(AccessLog(**access_payload))
+    session_id = await sql_controller.insert_session(AccessLog(**access_payload))
+
+    badges = badgr_session.get_user_badges(session_id)
+    total_badges = badges["unicornBadges"] + badges["trainingsCompleted"]
+    badgr_snapshot = [BadgeSnapshot(**badge) for badge in total_badges]
+
+    await sql_controller.badge_snapshot_insert(badgr_snapshot)
 
     user, log = await sql_controller.get_user_and_most_recent_session(
         login_request.Email
@@ -98,13 +107,13 @@ async def user_login(
 
 @login_router.post("/check_logins")
 async def login_stream(
-    payload = Body(...),
+    payload=Body(...),
     db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
 
     sql_controller = SQLController(db)
     results, last_result_id = await sql_controller.find_sessions_by_id(
-        payload['start_id']
+        payload["start_id"]
     )
 
     return {
