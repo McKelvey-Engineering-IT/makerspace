@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import CheckInTable from "./components/CheckInTable/CheckInTable";
 import StudentDetail from "./components/StudentDetail/StudentDetail";
 import FilterBar from "./components/FilterBar/FilterBar";
@@ -8,48 +8,84 @@ import { AppContext } from "./AppContext";
 import "./App.css";
 
 const App = () => {
-  const { selectedStudentId, updateTotalRecords, setNewRecords, lastCheckIn, setLastCheckIn, filter } = useContext(AppContext);
+  const {
+    selectedStudentId,
+    updateTotalRecords,
+    setNewRecords,
+    sortType,
+    filter,
+    currentPage,
+    setTotalRecords,
+    setNewRecordsUnread,
+    newRecords,
+      } = useContext(AppContext);
+  let lastRecordSeen = null;
 
   const { data: firstLoad } = useApi({
-    endpoint: `${process.env.REACT_APP_API_URL}/logins/historical?timeFilter=${filter}`
+    endpoint: `${process.env.REACT_APP_API_URL}/logins/historical?timeFilter=${filter}`,
   });
 
   useEffect(() => {
-    if (firstLoad.data) {
-      updateTotalRecords(firstLoad.data);
-      setLastCheckIn(firstLoad.last_checkin);
-    }
-  }, [firstLoad, updateTotalRecords, setLastCheckIn]);
+    if (!firstLoad?.data) return;
+    console.log("First load data:", firstLoad.data);
+    lastRecordSeen = firstLoad.last_record;
+    updateTotalRecords(firstLoad.data);
+  }, [firstLoad.data]);
 
   useEffect(() => {
     const fetchNewLogins = async () => {
-      console.log('trying here');
-      if (!lastCheckIn) return;
-      try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/logins/check_logins`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ start_time: lastCheckIn })
-        });
+      if (!lastRecordSeen) return;
 
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/logins/check_logins`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ start_id: lastRecordSeen }),
+          }
+        );
+
+        if (!response.ok)
+          throw new Error(`HTTP error! Status: ${response.status}`);
 
         const newLogins = await response.json();
-        console.log('here is the new logins', newLogins);
+
         if (newLogins.data.length > 0) {
-          console.log('also here')
-          setLastCheckIn(newLogins.last_checkin);
-          setNewRecords(newLogins.data);
+          setNewRecords((prevRecords) => {
+            const existingIds = new Set(prevRecords.map(record => record.LogID));
+            const uniqueNewLogins = newLogins.data.filter(record => !existingIds.has(record.LogID));
+            return [...prevRecords, ...uniqueNewLogins];
+          });
         }
+
+        lastRecordSeen = newLogins.last_record;
       } catch (error) {
         console.error("Failed to fetch new logins:", error);
       }
     };
 
-    const intervalId = setInterval(fetchNewLogins, 10000); 
+    fetchNewLogins();
+    const intervalId = setInterval(fetchNewLogins, 10000);
 
-    return () => clearInterval(intervalId); 
-  }, [lastCheckIn, setNewRecords, setLastCheckIn]);
+    return () => clearInterval(intervalId);
+  }, [firstLoad]);
+
+  useEffect(() => {
+    if (
+      sortType === "lastSignIn" &&
+      currentPage === 1 &&
+      newRecords.length > 0
+    ) {
+      setNewRecordsUnread(() => newRecords.map((record) => record.LogID));
+      setTotalRecords((prevRecords) => {
+        const existingIds = new Set(prevRecords.map(record => record.LogID));
+        const uniqueNewRecords = newRecords.filter(record => !existingIds.has(record.LogID));
+        return [...uniqueNewRecords, ...prevRecords];
+      });
+      setNewRecords([]);
+    }
+  }, [newRecords]);
 
   return (
     <div className="app-container">

@@ -13,6 +13,7 @@
   margin-bottom: 20px;
   transition: transform 0.2s ease, border 0.2s ease;
   cursor: pointer;
+  position: relative; /* Added for positioning the overlay */
 }
 
 .checkin-card:hover {
@@ -43,5 +44,20 @@
 
 .selected-row {
   background-color: #f0f0f0; /* after click */
-  border: 2px solid #ccc; 
+  border: 2px solid #ccc;
+}
+
+/* New unread record styles */
+.unread::after {
+  content: "NEW";
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  background-color: #ff5252;
+  color: white;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }

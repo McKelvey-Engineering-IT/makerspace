@@ -13,6 +13,9 @@ export const AppProvider = ({ children }) => {
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState("day");
   const [lastCheckIn, setLastCheckIn] = useState(null);
+  const [sortType, setSortType] = useState("lastSignIn");
+  const [sortedRecords, setSortedRecords] = useState([]);
+  const [newRecordsUnread, setNewRecordsUnread] = useState([]);
 
   useEffect(() => {
     updateRecordsInView();
@@ -59,7 +62,13 @@ export const AppProvider = ({ children }) => {
         filter,
         setFilter,
         lastCheckIn,
-        setLastCheckIn
+        setLastCheckIn,
+        sortType,
+        setSortType,
+        sortedRecords,
+        setSortedRecords,
+        newRecordsUnread,
+        setNewRecordsUnread
       }}
     >
       {children}

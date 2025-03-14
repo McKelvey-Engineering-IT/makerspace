@@ -3,14 +3,14 @@ import { AppContext } from "../../AppContext";
 import "./CheckInTable.css";
 
 const CheckInTable = () => {
-  const { recordsInView, selectedStudent, setSelectedStudent } = useContext(AppContext);
+  const { recordsInView, selectedStudent, setSelectedStudent, sortedRecords, newRecordsUnread, totalRecords } = useContext(AppContext);
 
   return (
     <div className="checkin-list">
-      {recordsInView.map(({ id, Name, Email, IsMember, SignInTime }) => (
+      {sortedRecords.map(({ LogID, Name, Email, IsMember, SignInTime }) => (
         <div
-          key={id}
-          className={`checkin-card ${IsMember ? "member-card" : "nonmember-card"} 
+          key={LogID}
+          className={`checkin-card ${IsMember ? "member-card" : "nonmember-card"} ${newRecordsUnread.includes(LogID) ? "unread" : ""}
                       ${selectedStudent === Email ? "selected-row" : ""}`}
           onClick={() => setSelectedStudent(Email)}
         >

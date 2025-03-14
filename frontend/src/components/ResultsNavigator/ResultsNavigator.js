@@ -1,4 +1,4 @@
-import React, {useContext} from "react";
+import React, { useContext } from "react";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -8,8 +8,21 @@ import NotificationsIcon from "@mui/icons-material/Notifications";
 import { AppContext } from "../../AppContext";
 import "./ResultsNavigator.css";
 
-const ResultsNavigator = ({}) => {
-  const {totalPages, recordsPerPage, setRecordsPerPage, newRecords, totalRecords, currentPage, setCurrentPage, recordsInView } = useContext(AppContext);
+const ResultsNavigator = () => {
+  const {
+    totalPages,
+    recordsPerPage,
+    setRecordsPerPage,
+    newRecords,
+    setNewRecords,
+    totalRecords,
+    setTotalRecords,
+    currentPage,
+    setCurrentPage,
+    recordsInView,
+    setSortType,
+    setNewRecordsUnread
+  } = useContext(AppContext);
   const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const handleRecordsPerPageChange = (e) => {
@@ -18,6 +31,13 @@ const ResultsNavigator = ({}) => {
 
   const handlePageChange = (e) => {
     setCurrentPage(e.target.value);
+  };
+
+  const handleChipClick = () => {
+    setNewRecordsUnread(() => newRecords.map((record) => record.LogID));
+    setTotalRecords((prevTotalRecords) => [...newRecords, ...prevTotalRecords]);
+    setSortType("lastSignIn");
+    setNewRecords([]);
   };
 
   return (
@@ -62,13 +82,17 @@ const ResultsNavigator = ({}) => {
 
         {newRecords.length > 0 && (
           <Chip
-          icon={<NotificationsIcon />}
-          label={`${newRecords.length} new login${newRecords.length > 1 ? "s" : ""}. Click to view`}
-          onClick={() => alert("test")}
-          color="primary"
-          variant="outlined"
-          className={`new-records-chip ${newRecords.length > 0 ? "pulse-animation" : ""}`}
-        />
+            icon={<NotificationsIcon />}
+            label={`${newRecords.length} new login${
+              newRecords.length > 1 ? "s" : ""
+            }. Click to view`}
+            onClick={handleChipClick}
+            color="primary"
+            variant="outlined"
+            className={`new-records-chip ${
+              newRecords.length > 0 ? "pulse-animation" : ""
+            }`}
+          />
         )}
 
         <div className="records-count">

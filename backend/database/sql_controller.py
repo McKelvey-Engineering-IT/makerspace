@@ -54,7 +54,7 @@ class SQLController:
     async def insert_session(self, session_attempt: AccessLog) -> None:
         await self.create_record(session_attempt)
 
-    async def find_session_by_timestamp(self, start_time) -> list[AccessLog]:
+    async def find_sessions_by_timestamp(self, start_time) -> tuple[list[AccessLog], int]:
         async with self.db.begin():
             results = await self.db.execute(
                 select(AccessLog)
@@ -62,7 +62,23 @@ class SQLController:
                 .filter(AccessLog.SignInTime >= start_time)
             )
 
-            return results.scalars().all()
+            result = results.scalars().all()
+            lastEntry = result[-1].ID if result else None
+
+            return result, lastEntry
+
+    async def find_sessions_by_id(self, starting_id) -> tuple[list[AccessLog], int]:
+        async with self.db.begin():
+            results = await self.db.execute(
+                select(AccessLog)
+                .options(joinedload(AccessLog.user))
+                .filter(AccessLog.ID >= starting_id)
+            )
+        
+            result = results.scalars().all()
+            lastEntry = result[-1].ID if result else None
+
+            return result, lastEntry
 
     async def insert_user(self, user: User) -> None:
         user_record, session = await self.get_user_and_most_recent_session(user.Email)

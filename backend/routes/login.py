@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from fastapi import APIRouter, Body, Request, Depends
+from fastapi import APIRouter, Body, Depends
 from database.response_builder import ResponseBuilder
 from database.model.models import AccessLog, LoginRequest, User
 from database.sql_controller import SQLController
@@ -50,11 +50,11 @@ async def historical_lookup(
     time_delta = TIME_FRAMES[timeFilter]
     start_time = now - (time_delta.total_seconds() * 1000)
 
-    query_results = await sql_controller.find_session_by_timestamp(start_time)
+    query_results, last_result_id = await sql_controller.find_sessions_by_timestamp(start_time)
 
     return {
         "data": [ResponseBuilder.UserBasics(log.user, log) for log in query_results],
-        "last_checkin": datetime.now().timestamp() * 1000,
+        "last_record": last_result_id,
     }
 
 
@@ -97,16 +97,16 @@ async def user_login(
 
 @login_router.post("/check_logins")
 async def login_stream(
-    start_time = Body(...),
+    payload = Body(...),
     db: AsyncSession = Depends(get_db),
 ) -> Dict[str, Any]:
-    print(start_time)
+
     sql_controller = SQLController(db)
-    results = await sql_controller.find_session_by_timestamp(
-        start_time['start_time']
+    results, last_result_id = await sql_controller.find_sessions_by_id(
+        payload['start_id']
     )
 
     return {
         "data": [ResponseBuilder.UserBasics(log.user, log) for log in results],
-        "last_checkin": datetime.now().timestamp() * 1000,
+        "last_record": last_result_id,
     }

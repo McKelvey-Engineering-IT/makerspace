@@ -13,4 +13,5 @@ class ResponseBuilder:
             "SignInTime": access_log.SignInTime,
             "IsMember": access_log.IsMember,
             "LastSignIn": access_log.SignInTime,
+            "LogID": access_log.ID,
         }
