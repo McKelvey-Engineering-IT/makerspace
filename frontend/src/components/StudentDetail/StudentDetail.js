@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useContext, useState } from "react";
+import { AppContext } from "../../AppContext";
 import "./StudentDetail.css";
 import {
   FaCrown,
@@ -9,13 +10,14 @@ import {
 
 const StudentDetail = ({ studentId }) => {
   const [studentInfo, setStudentInfo] = useState(null);
+  const { selectedStudent } = useContext(AppContext);
 
   useEffect(() => {
     const fetchStudentData = async () => {
       setStudentInfo(null);
 
       const badgeapi = await fetch(
-        `${process.env.REACT_APP_API_URL}/logins/retrieve_user?email=${studentId}`
+        `${process.env.REACT_APP_API_URL}/logins/retrieve_user?email=${selectedStudent}`
       );
       
       let badges = await badgeapi.json();
@@ -24,7 +26,7 @@ const StudentDetail = ({ studentId }) => {
       setStudentInfo(badges);
     };
     fetchStudentData();
-  }, [studentId]);
+  }, [selectedStudent]);
 
   return (
     <>
@@ -35,8 +37,8 @@ const StudentDetail = ({ studentId }) => {
           <div className="student-info-card">
             <div className="header-section">
               <FaUserCircle className="user-icon" />
-              <h2>{studentInfo.name}</h2>
-              <h2>{studentInfo.email}</h2>
+              <h2>{studentInfo.Name}</h2>
+              <h3>{studentInfo.Email}</h3>
               <p
                 className={`member-status ${
                   studentInfo.isMember ? "member" : "non-member"

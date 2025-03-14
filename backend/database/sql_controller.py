@@ -72,11 +72,11 @@ class SQLController:
             results = await self.db.execute(
                 select(AccessLog)
                 .options(joinedload(AccessLog.user))
-                .filter(AccessLog.ID >= starting_id)
+                .filter(AccessLog.ID > starting_id)
             )
         
             result = results.scalars().all()
-            lastEntry = result[-1].ID if result else None
+            lastEntry = result[-1].ID if result else starting_id
 
             return result, lastEntry
 

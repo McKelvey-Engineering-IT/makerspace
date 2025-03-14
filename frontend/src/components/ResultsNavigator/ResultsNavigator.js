@@ -1,3 +1,4 @@
+// ResultsNavigator.jsx
 import React, { useContext } from "react";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -21,12 +22,27 @@ const ResultsNavigator = () => {
     setCurrentPage,
     recordsInView,
     setSortType,
-    setNewRecordsUnread
+    setNewRecordsUnread,
+    setTotalPages,
+    sortedRecords
   } = useContext(AppContext);
+
+  // Recalculate page options when totalPages changes
   const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
+  // Handle recordsPerPage change
   const handleRecordsPerPageChange = (e) => {
-    setRecordsPerPage(e.target.value);
+    const newRecordsPerPage = e.target.value;
+    setRecordsPerPage(newRecordsPerPage);
+
+    const newTotalPages = Math.ceil(sortedRecords.length / newRecordsPerPage);
+    setTotalPages(newTotalPages);
+
+    if (currentPage > newTotalPages) {
+      setCurrentPage(newTotalPages > 0 ? newTotalPages : 1);
+    } else {
+      setCurrentPage(currentPage);
+    }
   };
 
   const handlePageChange = (e) => {
@@ -36,8 +52,9 @@ const ResultsNavigator = () => {
   const handleChipClick = () => {
     setNewRecordsUnread(() => newRecords.map((record) => record.LogID));
     setTotalRecords((prevTotalRecords) => [...newRecords, ...prevTotalRecords]);
-    setSortType("lastSignIn");
+    setSortType("lastSignIn"); 
     setNewRecords([]);
+    setCurrentPage(1);
   };
 
   return (
@@ -96,7 +113,7 @@ const ResultsNavigator = () => {
         )}
 
         <div className="records-count">
-          Displaying {recordsInView.length} of {totalRecords.length} records
+          Displaying {recordsInView.length} of {sortedRecords.length || totalRecords.length} records
         </div>
       </div>
     </div>

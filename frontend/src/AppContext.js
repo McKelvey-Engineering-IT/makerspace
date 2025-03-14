@@ -17,10 +17,6 @@ export const AppProvider = ({ children }) => {
   const [sortedRecords, setSortedRecords] = useState([]);
   const [newRecordsUnread, setNewRecordsUnread] = useState([]);
 
-  useEffect(() => {
-    updateRecordsInView();
-  }, [currentPage, recordsPerPage, totalRecords]);
-
   const updateRecordsInView = () => {
     const start = (currentPage - 1) * recordsPerPage;
     const end = start + recordsPerPage;

@@ -1,4 +1,5 @@
-import React, { useState, useContext, useEffect, useCallback } from "react";
+// FilterBar.jsx
+import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "../../AppContext";
 import ResultsNavigator from "../ResultsNavigator/ResultsNavigator";
 import "./FilterBar.css";
@@ -11,10 +12,13 @@ const FilterBar = () => {
     setSortType,
     setRecordsInView,
     totalRecords,
-    setTotalRecords,
     setCurrentPage,
-    updateTotalRecords,
+    sortedRecords,
     setSortedRecords,
+    currentPage,
+    recordsPerPage,
+    setTotalPages, 
+    recordsInView
   } = useContext(AppContext);
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,16 +41,17 @@ const FilterBar = () => {
     setCurrentPage(1);
   };
 
-  // Define a single function to handle both filtering and sorting
+  // Process records - filtering, sorting, and search
   useEffect(() => {
-    console.log("Processing records, totalRecords:", totalRecords.length);
+    console.log("Processing records, totalRecords:", totalRecords?.length);
 
     if (!totalRecords || totalRecords.length === 0) {
       console.log("No records to process");
-      setRecordsInView([]);
+      setSortedRecords([]);
       return;
     }
-    console.log("Total records:", totalRecords.length);
+    
+    // First apply time-based filtering
     const now = new Date();
     let processedRecords = totalRecords.filter((record) => {
       const signInTime = new Date(record.SignInTime);
@@ -60,8 +65,10 @@ const FilterBar = () => {
         return true;
       }
     });
+    
     console.log("After filtering by time:", processedRecords.length);
-
+    
+    // Apply search term filter
     if (searchTerm.trim()) {
       const term = searchTerm.toLowerCase();
       processedRecords = processedRecords.filter(
@@ -71,7 +78,8 @@ const FilterBar = () => {
       );
       console.log("After search:", processedRecords.length);
     }
-
+    
+    // Apply sorting
     processedRecords.sort((a, b) => {
       if (sortType === "lastSignIn") {
         return new Date(b.SignInTime) - new Date(a.SignInTime);
@@ -82,11 +90,39 @@ const FilterBar = () => {
       }
       return 0;
     });
+    console.log("hereeeeeeee");
     console.log("Final processed records:", processedRecords.length);
-
     setSortedRecords(processedRecords);
-    console.log("Set records in view:", processedRecords.length);
-  }, [totalRecords]);
+  }, [totalRecords, filter, searchTerm, sortType]);
+
+  // Handle pagination separately
+  useEffect(() => {
+    if (!sortedRecords || sortedRecords.length === 0) {
+      setRecordsInView([]);
+      setTotalPages(1);
+      return;
+    }
+    console.log('herrrreerrererere 134353')
+    console.log(sortedRecords)
+    // Calculate total pages
+    const calculatedTotalPages = Math.ceil(sortedRecords.length / recordsPerPage);
+    setTotalPages(calculatedTotalPages);
+    
+    // Ensure current page is valid
+    if (currentPage > calculatedTotalPages && calculatedTotalPages > 0) {
+      setCurrentPage(calculatedTotalPages);
+      return; // Let the next effect cycle handle the pagination
+    }
+
+    // Apply pagination
+    const startIndex = (currentPage - 1) * recordsPerPage;
+    const endIndex = startIndex + recordsPerPage;
+    const paginatedRecords = sortedRecords.slice(startIndex, endIndex);
+    
+    setRecordsInView(paginatedRecords);
+    console.log(recordsInView)
+    console.log(`Showing records ${startIndex + 1}-${Math.min(endIndex, sortedRecords.length)} of ${sortedRecords.length}`);
+  }, [currentPage, sortedRecords, setCurrentPage, recordsPerPage]);
 
   return (
     <div className="filter-bar">
@@ -130,7 +166,7 @@ const FilterBar = () => {
           </div>
         </div>
       </div>
-      <ResultsNavigator />
+      <ResultsNavigator  />
     </div>
   );
 };

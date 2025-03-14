@@ -62,12 +62,12 @@ class BadgrConnector:
         badges = self.get_by_email(email)
         response = {"isMember": False, **self.organize_badges(badges)}
 
+        from pprint import pprint
+        pprint(badges)
         if badges:
+
             response.update(
                 {
-                    "name": badges[0]["extensions"]["extensions:recipientProfile"][
-                        "name"
-                    ],
                     "isMember": True,
                 }
             )

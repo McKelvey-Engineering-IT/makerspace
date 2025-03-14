@@ -41,6 +41,7 @@ async def historical_lookup(
         "day": timedelta(days=1),
         "week": timedelta(weeks=1),
         "month": timedelta(days=30),
+        "full": timedelta(days=365*5),
     }
 
     if timeFilter not in TIME_FRAMES:

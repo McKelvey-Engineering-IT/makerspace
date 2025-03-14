@@ -9,7 +9,7 @@ import "./App.css";
 
 const App = () => {
   const {
-    selectedStudentId,
+    selectedStudent,
     updateTotalRecords,
     setNewRecords,
     sortType,
@@ -28,7 +28,9 @@ const App = () => {
   useEffect(() => {
     if (!firstLoad?.data) return;
     console.log("First load data:", firstLoad.data);
-    lastRecordSeen = firstLoad.last_record;
+
+    if(lastRecordSeen === null) lastRecordSeen = firstLoad.last_record;
+
     updateTotalRecords(firstLoad.data);
   }, [firstLoad.data]);
 
@@ -97,7 +99,7 @@ const App = () => {
           <CheckInTable />
         </div>
         <div className="right-panel">
-          {selectedStudentId ? (
+          {selectedStudent ? (
             <StudentDetail />
           ) : (
             <p className="select-prompt">Select a member to view details</p>
