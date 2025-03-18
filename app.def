@@ -6,20 +6,22 @@ From: python:3.11-slim
     Version 1.0
 
 %post
-    # Update and install prerequisites
-    apt-get update && apt-get install -y \
-        curl gnupg unixodbc unixodbc-dev libssl1.1 odbcinst
+    curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/yum.repos.d/microsoft.repo
+    yum install -y curl gnupg unixODBC unixODBC-devel
     
-    # Add the Microsoft repository
-    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-    add-apt-repository "$(curl -fsSL https://packages.microsoft.com/config/ubuntu/20.04/prod.list)"
-    
-    # Install ODBC Driver for MSSQL
-    apt-get update && apt-get install -y \
-        msodbcsql17 mssql-tools
-    
-    # Accept the EULA (optional, but needed for silent install)
-    echo 'export ACCEPT_EULA=Y' >> $SINGULARITY_ENVIRONMENT
+    # Install Microsoft ODBC Driver 18 for SQL Server
+    yum install -y msodbcsql18
+
+    # Install mssql-tools (optional for command line tools)
+    yum install -y mssql-tools18
+
+    # Accept EULA (optional for silent installs)
+    echo 'export ACCEPT_EULA=Y' | tee -a /etc/profile
+    source /etc/profile
+
+    # Clean up to reduce image size
+    yum clean all
+    rm -rf /var/cache/yum/* /var/lib/apt/lists/*
     
     # Print the working directory during the build process
     echo "Building container. Current directory: $PWD"
