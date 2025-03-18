@@ -6,6 +6,21 @@ From: python:3.11-slim
     Version 1.0
 
 %post
+    # Update and install prerequisites
+    apt-get update && apt-get install -y \
+        curl gnupg unixodbc unixodbc-dev libssl1.1 odbcinst
+    
+    # Add the Microsoft repository
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
+    add-apt-repository "$(curl -fsSL https://packages.microsoft.com/config/ubuntu/20.04/prod.list)"
+    
+    # Install ODBC Driver for MSSQL
+    apt-get update && apt-get install -y \
+        msodbcsql17 mssql-tools
+    
+    # Accept the EULA (optional, but needed for silent install)
+    echo 'export ACCEPT_EULA=Y' >> $SINGULARITY_ENVIRONMENT
+    
     # Print the working directory during the build process
     echo "Building container. Current directory: $PWD"
     
