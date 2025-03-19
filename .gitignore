@@ -28,3 +28,5 @@ yarn-error.log*
 testing_data.json
 
 build
+
+.env
