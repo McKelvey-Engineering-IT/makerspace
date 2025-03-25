@@ -1,6 +1,7 @@
 import os
 import logging
 from dotenv import load_dotenv
+load_dotenv()
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
@@ -10,8 +11,6 @@ import uvicorn
 
 from config import Settings
 from routes.login import login_router
-
-load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -41,14 +40,6 @@ def create_app() -> FastAPI:
             return JSONResponse(status_code=404, content={"detail": "Frontend index.html not found."})
         with open(index_path, "r") as f:
             return HTMLResponse(content=f.read())
-
-    @app.exception_handler(Exception)
-    async def global_exception_handler(request: Request, exc: Exception):
-        logger.error(f"Unhandled error on {request.url}: {exc}", exc_info=True)
-        return JSONResponse(
-            status_code=500,
-            content={"detail": "Internal Server Error. Please contact support."},
-        )
 
     if os.path.exists(settings.FRONTEND_BUILD_DIR):
         app.mount("/", StaticFiles(directory=settings.FRONTEND_BUILD_DIR, html=True), name="static")
