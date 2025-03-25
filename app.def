@@ -2,90 +2,92 @@ Bootstrap: docker
 From: python:3.11-slim
 
 %labels
-    Maintainer YourName
+    Maintainer Sergio Estrada
     Version 1.0
 
 %post
+    echo "Setting up container..."
+    ## BEGIN INITIALIZAITION REGION ##
+    # Run update
+    apt-get update
+    
+    # Create backend and frontend directories
+    mkdir -p /app/backend
+    mkdir -p /app/frontend
+    ## END INITIALIZAITION REGION ##
+    
+
+    ## BEGIN OBDC DRIVER INSTALLATION REGION ##
     # Install necessary dependencies
-    apt-get update
-    apt-get install -y curl gnupg unixodbc unixodbc-dev
+  
+    # apt-get install -y curl gnupg unixodbc unixodbc-dev ca-certificates
+    # Add Microsoft's repository for ODBC Driver 18 (Commented Out)
+    # curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc
+    # curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
 
-    # Add Microsoft's repository for ODBC Driver 18
-    curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc
-    curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
+    # Install Microsoft ODBC Driver 18 for SQL Server (Commented Out)
+    # apt-get update
+    # ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
+    ## END OBDC DRIVER INSTALLATION REGION ##
 
-    # Install Microsoft ODBC Driver 18 for SQL Server
-    apt-get update
-    ACCEPT_EULA=Y apt-get install -y msodbcsql18
+    ## BEGIN FRONTEND DELIVERY REGION ##
+    # Install Node.js & npm
+    apt-get install -y nodejs npm
+    ## END FRONTEND DELIVERY REGION ##
 
-    # Install mssql-tools18 and accept the EULA during installation
-    ACCEPT_EULA=Y apt-get install -y mssql-tools18
-
+    ## BEGIN CLOSING BUILD REGION ##
     # Clean up unnecessary files
     apt-get clean
     rm -rf /var/lib/apt/lists/*
-    
-    # Print the working directory during the build process
-    echo "Building container. Current directory: $PWD"
-    
-    # Install curl, gnupg, and Node.js from the default Debian/Ubuntu repositories
-    apt-get update && apt-get install -y curl gnupg
-    apt-get install -y nodejs npm
-    
-    # Verify Node.js and npm installation
-    node -v
-    npm -v
 
-    # Create necessary directories
-    mkdir -p /app/backend
-    mkdir -p /app/frontend
-    
     echo "Finished building container."
+    ## END CLOSING BUILD REGION ##
 
 %environment
     export PYTHONUNBUFFERED=1
     export APP_HOME=/app
+    export PATH=/opt/mssql-tools18/bin:$PATH
 
-%runscript
-    # Install CA certificates
-    apt-get update && apt-get install -y ca-certificates
-    update-ca-certificates
+%startscript
+    echo "Starting container services..."
 
-    # Configure npm to bypass strict SSL
-    npm config set strict-ssl false
-    echo "Container starting..."
-    echo "Current directory: $PWD"
-    
-    # Check if the directories have been properly mounted
-    if [ ! -d "/app/frontend" ] || [ ! "$(ls -A /app/frontend)" ]; then
-        echo "ERROR: /app/frontend appears to be empty. Did you bind mount it correctly?"
+    # Ensure directories are mounted
+    if [ ! -d "/app/frontend" ] || [ ! "$(ls -A /app/frontend 2>/dev/null)" ]; then
+        echo "ERROR: /app/frontend is empty or not mounted. Check your volume bindings."
         exit 1
     fi
-    
-    if [ ! -d "/app/backend" ] || [ ! "$(ls -A /app/backend)" ]; then
-        echo "ERROR: /app/backend appears to be empty. Did you bind mount it correctly?"
+
+    if [ ! -d "/app/backend" ] || [ ! "$(ls -A /app/backend 2>/dev/null)" ]; then
+        echo "ERROR: /app/backend is empty or not mounted. Check your volume bindings."
         exit 1
     fi
-    
+
+    # Install frontend dependencies
+    if [ -f /app/frontend/package.json ]; then
+        cd /app/frontend
+        npm install
+    else
+        echo "WARNING: package.json not found in /app/frontend"
+    fi
+
+    # Build Frontend
+    cd /app/frontend
+    npm run build 
+    echo "Frond build successful"
+
     # Install Python dependencies
-    echo "Installing Python dependencies..."
     if [ -f /app/backend/requirements.txt ]; then
         pip install --no-cache-dir -r /app/backend/requirements.txt
     else
         echo "WARNING: requirements.txt not found in /app/backend"
     fi
 
-    # Build frontend
-    echo "Building frontend..."
-    cd /app/frontend
-    if [ -f package.json ]; then
-        npm install
-        npm run build
-    else
-        echo "WARNING: package.json not found in /app/frontend"
-    fi
-
-    # Start the FastAPI app
-    echo "Starting backend application..."
+    # Start FastAPI backend
+    echo "Starting backend..."
     cd /app/backend
-    python main.py
+    uvicorn main:app --host 0.0.0.0 --port 32776 &
+
+    wait  # Keeps the processes alive
+
+%runscript
+    echo "Container running. Use 'apptainer instance start' to start services properly."

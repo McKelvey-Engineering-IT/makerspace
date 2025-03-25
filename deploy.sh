@@ -23,4 +23,4 @@ fi
 cd "$REPO_DIR"
 
 echo "Running container with repo bind-mounted..."
-apptainer run --bind "$REPO_DIR:$MOUNT_POINT" "$SIF_FILE"
+apptainer instance start --bind "$REPO_DIR:$MOUNT_POINT" "$SIF_FILE" makerspace
