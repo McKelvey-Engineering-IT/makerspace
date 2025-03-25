@@ -26,7 +26,8 @@ class Settings(BaseModel):
             return os.getenv(f"{self.DB_TYPE}_{field}")
 
         if self.IS_LOCAL:
-            self.FRONTEND_BUILD_DIR = os.path.join(os.getcwd(), "frontend", "build")
+            self.FRONTEND_BUILD_DIR = os.path.join("..", "frontend", "build")
+            print(self.FRONTEND_BUILD_DIR)
             self.PORT = 8001
 
         self.DB = {
