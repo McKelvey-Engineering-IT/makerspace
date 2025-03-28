@@ -11,11 +11,6 @@ From: python:3.11-slim
     # Run update
     apt-get update
     
-    # Create backend and frontend directories
-    mkdir -p /app/backend
-    mkdir -p /app/frontend
-    ## END INITIALIZAITION REGION ##
-    
 
     ## BEGIN OBDC DRIVER INSTALLATION REGION ##
     # Install necessary dependencies
@@ -45,49 +40,42 @@ From: python:3.11-slim
 
 %environment
     export PYTHONUNBUFFERED=1
-    export APP_HOME=/app
+    export APP_HOME=/
     export PATH=/opt/mssql-tools18/bin:$PATH
 
+    
 %startscript
-    echo "Starting container services..."
+    # Log file in the current working directory
+    LOG_FILE="container_startup.log"
+    
+    # Redirect all output to the log file
+    {
+        echo "$(date): Starting container services..."
+        
+        # Install frontend dependencies
+        if [ -f frontend/package.json ]; then
+            cd frontend
+            npm install
+        else
+            echo "WARNING: package.json not found in frontend directory"
+        fi
 
-    # Ensure directories are mounted
-    if [ ! -d "/app/frontend" ] || [ ! "$(ls -A /app/frontend 2>/dev/null)" ]; then
-        echo "ERROR: /app/frontend is empty or not mounted. Check your volume bindings."
-        exit 1
-    fi
+        # Build Frontend
+        cd frontend
+        npm run build 
+        echo "Frontend build successful"
+        cd ../backend
 
-    if [ ! -d "/app/backend" ] || [ ! "$(ls -A /app/backend 2>/dev/null)" ]; then
-        echo "ERROR: /app/backend is empty or not mounted. Check your volume bindings."
-        exit 1
-    fi
+        # Install Python dependencies
+        if [ -f requirements.txt ]; then
+            pip install --no-cache-dir -r requirements.txt
+        else
+            echo "WARNING: requirements.txt not found in backend directory"
+        fi
 
-    # Install frontend dependencies
-    if [ -f /app/frontend/package.json ]; then
-        cd /app/frontend
-        npm install
-    else
-        echo "WARNING: package.json not found in /app/frontend"
-    fi
+        # Start FastAPI backend
+        echo "Starting backend..."
+        python -m uvicorn main:app --host 0.0.0.0 --port 32776 --reload
 
-    # Build Frontend
-    cd /app/frontend
-    npm run build 
-    echo "Frond build successful"
-
-    # Install Python dependencies
-    if [ -f /app/backend/requirements.txt ]; then
-        pip install --no-cache-dir -r /app/backend/requirements.txt
-    else
-        echo "WARNING: requirements.txt not found in /app/backend"
-    fi
-
-    # Start FastAPI backend
-    echo "Starting backend..."
-    cd /app/backend
-    uvicorn main:app --host 0.0.0.0 --port 32776 &
-
-    wait  # Keeps the processes alive
-
-%runscript
-    echo "Container running. Use 'apptainer instance start' to start services properly."
+        wait  # Keeps the processes alive
+    } > "$LOG_FILE" 2>&1
