@@ -230,3 +230,27 @@ ul li {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.error-popup {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+  padding: 16px;
+  border-radius: 8px;
+  text-align: center;
+  margin: 16px 0;
+}
+
+.error-popup button {
+  background-color: #721c24;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.error-popup button:hover {
+  background-color: #a94442;
+}
