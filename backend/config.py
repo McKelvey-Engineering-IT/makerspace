@@ -10,7 +10,7 @@ class Settings(BaseModel):
     BADGR_MAKERSPACE_PASSWORD: str = Field(default_factory=lambda: os.getenv('MAKERSPACE_PASSWORD'))
     BADGR_MAKERSPACE_MEMBER_BADGR: str = Field(default_factory=lambda: os.getenv('MAKERSPACE_MEMBER_BADGE'))
     
-    FRONTEND_BUILD_DIR: str = Field(default_factory=lambda: os.path.join(os.getcwd(), "frontend", "build"))
+    FRONTEND_BUILD_DIR: str = Field(default_factory=lambda: os.path.join("..", "frontend", "build"))
     PORT: int = Field(default=32776)
     
     DB: dict = Field(default_factory=dict)
