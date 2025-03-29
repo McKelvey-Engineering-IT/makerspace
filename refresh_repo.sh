@@ -14,16 +14,16 @@ fi
 
 # Move build.sh and deploy.sh to the parent directory
 if [ -f "$REPO_DIR/build_image.sh" ]; then
-    mv "$REPO_DIR/build_image.sh" "$PARENT_DIR/"
+    mv "$REPO_DIR/build_image.sh" "$PARENT_DIR/build_image.sh"
     echo "Moved build.sh to $PARENT_DIR"
 fi
 
 if [ -f "$REPO_DIR/deploy_app.sh" ]; then
-    mv "$REPO_DIR/deploy_app.sh" "$PARENT_DIR/"
+    mv "$REPO_DIR/deploy_app.sh" "$PARENT_DIR/deploy_app.sh"
     echo "Moved deploy.sh to $PARENT_DIR"
 fi
 
 if [ -f "$REPO_DIR/refresh_repo.sh" ]; then
-    mv "$REPO_DIR/refresh_repo.sh" "$PARENT_DIR/"
+    mv "$REPO_DIR/refresh_repo.sh" "$PARENT_DIR/refresh_repo.sh"
     echo "Moved deploy.sh to $PARENT_DIR"
 fi
