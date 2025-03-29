@@ -11,7 +11,7 @@ import InfoSection from "./InfoSection";
 
 const StudentDetail = () => {
   const [studentInfo, setStudentInfo] = useState(null);
-  const [error, setError] = useState(null); // State to track errors
+  const [error, setError] = useState(null); 
   const { selectedStudent } = useContext(AppContext);
 
   useEffect(() => {
@@ -51,7 +51,6 @@ const StudentDetail = () => {
         {error ? (
           <div className="error-popup">
             <p>{error}</p>
-            <button onClick={handlePopupClose}>Close</button>
           </div>
         ) : !studentInfo ? (
           <div className="spinner"></div>
