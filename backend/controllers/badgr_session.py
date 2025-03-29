@@ -30,7 +30,7 @@ class BadgrSession:
             
             return narrative[0], ""
 
-        badge_type = {"unicornBadges": [], "trainingsCompleted": []}
+        badge_type = {"unicornBadges": [], "trainingsCompleted": [], "powertoolTraining": [], "makertechTraining": []}
 
         for badge in self.session_badges:
             narrative_extract = badge.get("narrative")
