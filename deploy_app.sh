@@ -12,6 +12,10 @@ else
     echo "Frontend directory not found: $FRONTEND_DIR"
 fi
 
+
+echo "Shutting down previous container"
+apptainer instance stop makerspace
+
 # Run Apptainer instance with bind mount
 echo "Running container with repo bind-mounted..."
 apptainer instance start --bind "$REPO_DIR:$MOUNT_POINT" "$SIF_FILE" makerspace
