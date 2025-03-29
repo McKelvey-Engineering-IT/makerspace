@@ -38,11 +38,13 @@ def create_app() -> FastAPI:
     frontend_static_dir = os.path.join(settings.FRONTEND_BUILD_DIR, "static")
     if os.path.exists(frontend_static_dir):
         app.mount("/static", StaticFiles(directory=frontend_static_dir), name="static")
+        print('trstetete')
 
     @app.get("/{full_path:path}", response_class=HTMLResponse)
     async def catch_all(full_path: str):
         index_path = os.path.join(settings.FRONTEND_BUILD_DIR, "index.html")
         print(index_path)
+
         if not os.path.exists(index_path):
             return JSONResponse(status_code=404, content={"detail": "Frontend index.html not found."})
         with open(index_path, "r") as f:
@@ -62,3 +64,7 @@ def create_app() -> FastAPI:
     return app
 
 app = create_app()
+
+if __name__ == "__main__":
+    app = create_app()
+    uvicorn.run(app, host="127.0.0.1", port=settings.PORT)

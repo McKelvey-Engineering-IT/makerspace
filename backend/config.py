@@ -8,8 +8,9 @@ class Settings(BaseModel):
     DB_TYPE: str = Field(default_factory=lambda: os.getenv("DB_TYPE", "MYSQL"))
     BADGR_MAKERSPACE_EMAIL: str = Field(default_factory=lambda: os.getenv('MAKERSPACE_EMAIL'))
     BADGR_MAKERSPACE_PASSWORD: str = Field(default_factory=lambda: os.getenv('MAKERSPACE_PASSWORD'))
+    BADGR_MAKERSPACE_MEMBER_BADGR: str = Field(default_factory=lambda: os.getenv('MAKERSPACE_MEMBER_BADGE'))
     
-    FRONTEND_BUILD_DIR: str = Field(default_factory=lambda: os.path.join(os.getenv("APP_HOME", "/app"), "frontend", "build"))
+    FRONTEND_BUILD_DIR: str = Field(default_factory=lambda: os.path.join(os.getcwd(), "frontend", "build"))
     PORT: int = Field(default=32776)
     
     DB: dict = Field(default_factory=dict)
@@ -26,8 +27,6 @@ class Settings(BaseModel):
             return os.getenv(f"{self.DB_TYPE}_{field}")
 
         if self.IS_LOCAL:
-            self.FRONTEND_BUILD_DIR = os.path.join("..", "frontend", "build")
-            print(self.FRONTEND_BUILD_DIR)
             self.PORT = 8001
 
         self.DB = {

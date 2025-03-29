@@ -20,22 +20,25 @@ class BadgrSession:
 
     def organize_badges(self, access_log_id=None) -> Dict[str, Any]:
         def get_badge_narrative_title(narrative: str) -> Tuple[str, str]:
-            narrative = badge["narrative"].split("\n")
+            if not narrative:
+                narrative = "No description available"
+
+            narrative = narrative.replace(":", "").split("Makerspace")
             
             if len(narrative) > 1:
                 return narrative[1], narrative[0]
             
-            narrative = badge["narrative"].split("Makerspace: ")
-
-            if len(narrative) > 1:
-                return f"Makerspace: {narrative[1]}", narrative[0]
-            
-            return narrative[0], narrative[0]
+            return narrative[0], ""
 
         badge_type = {"unicornBadges": [], "trainingsCompleted": []}
 
         for badge in self.session_badges:
-            narrative = get_badge_narrative_title(badge["narrative"])
+            narrative_extract = badge.get("narrative")
+
+            if not narrative_extract:
+                continue
+            
+            narrative = get_badge_narrative_title(narrative_extract)
 
             badge_structure = {
                 "Narrative_Title": narrative[1],
@@ -49,9 +52,13 @@ class BadgrSession:
                 "AccessLogID": access_log_id,
             }
 
-            if "unicorn" in badge_structure["Narrative_Title"].lower():
+            if "unicorn" in narrative_extract.lower():
                 badge_type["unicornBadges"].append(badge_structure)
-            else:
+            elif "makertech training" in narrative_extract.lower():
+                badge_type['makertechTraining'].append(badge_structure)
+            elif "powertool" in narrative_extract.lower():
+                badge_type['powertoolTraining'].append(badge_structure)
+            else:            
                 badge_type["trainingsCompleted"].append(badge_structure)
 
         return badge_type

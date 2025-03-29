@@ -1,5 +1,6 @@
 from typing import Any, Dict
 from fastapi import APIRouter, Body, Depends
+from config import Settings
 from database.response_builder import ResponseBuilder
 from database.model.models import AccessLog, BadgeSnapshot, LoginRequest, User
 from database.sql_controller import SQLController
@@ -7,6 +8,7 @@ from routes.dependencies import (
     get_state_manager,
     get_badgr_connector,
     get_db,
+    get_settings
 )
 from controllers.state_manager import StateManager
 from controllers.badgr_connector import BadgrConnector
@@ -23,10 +25,13 @@ async def user_badges(
     email: str,
     badgr_connect: BadgrConnector = Depends(get_badgr_connector),
     db: AsyncSession = Depends(get_db),
+    settings: Settings = Depends(get_settings)
 ) -> Dict[str, Any]:
     sql_controller = SQLController(db)
 
-    badgr_session_data = BadgrSession(email, badgr_connect, "t-3QAkVuTTC7U3lah6ssCg").get_user_badges()
+    print(settings.BADGR_MAKERSPACE_MEMBER_BADGR)
+
+    badgr_session_data = BadgrSession(email, badgr_connect, settings.BADGR_MAKERSPACE_MEMBER_BADGR).get_user_badges()
     user, session = await sql_controller.get_user_and_most_recent_session(email)
 
     return {**badgr_session_data, **ResponseBuilder.UserBasics(user, session)}
@@ -68,9 +73,10 @@ async def user_login(
     state: StateManager = Depends(get_state_manager),
     db: AsyncSession = Depends(get_db),
     badgr_connect: BadgrConnector = Depends(get_badgr_connector),
+    settings: Settings = Depends(get_settings)
 ) -> Dict[str, Any]:
     sql_controller = SQLController(db)
-    badgr_session = BadgrSession(login_request.Email, badgr_connect, "t-3QAkVuTTC7U3lah6ssCg")
+    badgr_session = BadgrSession(login_request.Email, badgr_connect, settings.BADGR_MAKERSPACE_MEMBER_BADGR)
 
     access_payload = {
         "Email": login_request.Email,
@@ -90,7 +96,7 @@ async def user_login(
     session_id = await sql_controller.insert_session(AccessLog(**access_payload))
 
     badges = badgr_session.get_user_badges(session_id)
-    total_badges = badges["unicornBadges"] + badges["trainingsCompleted"]
+    total_badges = badges["unicornBadges"] + badges["trainingsCompleted"] + badges['powertoolTraining'] + badges["trainingsCompleted"]
     badgr_snapshot = [BadgeSnapshot(**badge) for badge in total_badges]
 
     await sql_controller.badge_snapshot_insert(badgr_snapshot)

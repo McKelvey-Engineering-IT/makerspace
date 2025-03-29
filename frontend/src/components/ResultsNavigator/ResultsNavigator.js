@@ -1,5 +1,5 @@
 // ResultsNavigator.jsx
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
@@ -24,13 +24,20 @@ const ResultsNavigator = () => {
     setSortType,
     setNewRecordsUnread,
     setTotalPages,
-    sortedRecords
+    sortedRecords,
+    soundAlertsEnabled
   } = useContext(AppContext);
 
-  // Recalculate page options when totalPages changes
+  const audioRef = useRef(new Audio(process.env.PUBLIC_URL + "/alert.wav"));
+
+  useEffect(() => {
+    if (newRecords.length > 0 && soundAlertsEnabled) {
+      audioRef.current.play().catch(err => console.log('Audio playback prevented:', err));
+    }
+  }, [newRecords.length, soundAlertsEnabled]);
+
   const pageOptions = Array.from({ length: totalPages }, (_, i) => i + 1);
 
-  // Handle recordsPerPage change
   const handleRecordsPerPageChange = (e) => {
     const newRecordsPerPage = e.target.value;
     setRecordsPerPage(newRecordsPerPage);

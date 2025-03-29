@@ -6,18 +6,19 @@ import {
   FaCalendarAlt,
   FaListAlt,
   FaUserCircle,
+  FaTools,
 } from "react-icons/fa";
 import InfoSection from "./InfoSection";
 
 const StudentDetail = () => {
   const [studentInfo, setStudentInfo] = useState(null);
-  const [error, setError] = useState(null); 
+  const [error, setError] = useState(null);
   const { selectedStudent } = useContext(AppContext);
 
   useEffect(() => {
     const fetchStudentData = async () => {
       setStudentInfo(null);
-      setError(null); // Reset error state before fetching
+      setError(null);
 
       try {
         const badgeapi = await fetch(
@@ -42,7 +43,7 @@ const StudentDetail = () => {
   }, [selectedStudent]);
 
   const handlePopupClose = () => {
-    setError(null); // Clear the error state
+    setError(null);
   };
 
   return (
@@ -81,15 +82,28 @@ const StudentDetail = () => {
             </div>
             <InfoSection
               title="Trainings Completed"
-              icon={FaCrown}
-              payload={studentInfo.trainingsCompleted}
-              isImage
+              icon={FaListAlt}
+              payload={studentInfo.trainingsCompleted || []}
+              isImage={true}
             />
             <InfoSection
               title="Unicorn Badges"
               icon={FaCrown}
-              payload={studentInfo.unicornBadges}
-              isImage
+              payload={studentInfo.unicornBadges || []}
+              isImage={true}
+            />
+            <InfoSection
+              title="PowerTool Training"
+              icon={FaTools}
+              payload={studentInfo.powertoolTraining || []}
+              isImage={true}
+            />
+            <InfoSection
+              title="MakerTech Training"
+              icon={FaTools}
+              payload={studentInfo.makertechTraining || []}
+              isImage={true}
+              defaultCollapsed={true}
             />
           </div>
         )}

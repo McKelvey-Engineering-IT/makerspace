@@ -1,9 +1,17 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import { AppContext } from "../../AppContext";
 import "./CheckInTable.css";
 
 const CheckInTable = () => {
   const { recordsInView, selectedStudent, setSelectedStudent, newRecordsUnread } = useContext(AppContext);
+
+  const audioRef = useRef(new Audio(process.env.PUBLIC_URL + "/alert.wav"));
+
+  useEffect(() => {
+      if (newRecordsUnread > 0) {
+          audioRef.current.play().catch(err => console.log("Audio playback prevented:", err));
+      }
+  }, [newRecordsUnread]);
 
   return (
     <div className="checkin-list">
