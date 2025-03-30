@@ -82,6 +82,7 @@ async def user_login(
         "Email": login_request.Email,
         "SignInTime": datetime.now().timestamp() * 1000,
         "SignInTimeExternal": login_request.SignInTime,
+        "membershipYears": badgr_session.membership_years,  # Add membership years
         "IsMember": badgr_session.member_status,
     }
 

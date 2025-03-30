@@ -1,8 +1,31 @@
-// FilterBar.jsx
 import React, { useState, useContext, useEffect } from "react";
 import { AppContext } from "../../AppContext";
 import ResultsNavigator from "../ResultsNavigator/ResultsNavigator";
 import "./FilterBar.css";
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { styled } from '@mui/material/styles';
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '8px',
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      backgroundColor: 'rgba(0, 0, 0, 0.01)',
+    },
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'rgba(0, 0, 0, 0.15)',
+  },
+  '& .MuiSelect-select': {
+    padding: '10px 14px',
+  },
+  '& .MuiInputLabel-outlined': {
+    transform: 'translate(14px, 12px) scale(1)',
+  },
+  '& .MuiInputLabel-outlined.MuiInputLabel-shrink': {
+    transform: 'translate(14px, -6px) scale(0.75)',
+  },
+}));
 
 const FilterBar = () => {
   const {
@@ -18,30 +41,38 @@ const FilterBar = () => {
     currentPage,
     recordsPerPage,
     setTotalPages, 
-    recordsInView
+    recordsInView,
+    membershipYear,
+    setMembershipYear
   } = useContext(AppContext);
 
   const [searchTerm, setSearchTerm] = useState("");
 
+  const currentYear = new Date().getFullYear();
+  const years = Array.from(
+    { length: 3 },
+    (_, i) => String(currentYear - 2 + i) 
+  );
+
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
-    // Reset to first page when search changes
     setCurrentPage(1);
   };
 
   const handleSortChange = (event) => {
     setSortType(event.target.value);
-    // Reset to first page when sort changes
     setCurrentPage(1);
   };
 
   const handleFilterChange = (event) => {
     setFilter(event.target.value);
-    // Reset to first page when filter changes
     setCurrentPage(1);
   };
 
-  // Process records - filtering, sorting, and search
+  const handleYearChange = (event) => {
+    setMembershipYear(event.target.value);
+  };
+
   useEffect(() => {
     console.log("Processing records, totalRecords:", totalRecords?.length);
 
@@ -127,46 +158,68 @@ const FilterBar = () => {
   return (
     <div className="filter-bar">
       <div className="filter-bar-content">
-        <div className="search-container">
+        <div className="top-controls">
           <input
             type="text"
             className="search-box"
-            placeholder="Search by Name or Email"
+            placeholder="Search name/email..."
             value={searchTerm}
             onChange={handleSearchChange}
           />
         </div>
         <div className="dropdown-container">
-          <div className="dropdown-wrapper">
-            <label htmlFor="sort-dropdown">Sort by</label>
-            <select
+          <StyledFormControl>
+            <InputLabel id="sort-label">Sort by</InputLabel>
+            <Select
+              labelId="sort-label"
               id="sort-dropdown"
               value={sortType}
               onChange={handleSortChange}
-              className="dropdown"
+              label="Sort by"
+              sx={{ minWidth: 140 }}
             >
-              <option value="lastSignIn">Last Sign In</option>
-              <option value="name">Name</option>
-              <option value="studentId">Email</option>
-            </select>
-          </div>
-          <div className="dropdown-wrapper">
-            <label htmlFor="time-dropdown">Time period</label>
-            <select
+              <MenuItem value="lastSignIn">Last Sign In</MenuItem>
+              <MenuItem value="name">Name</MenuItem>
+              <MenuItem value="studentId">Email</MenuItem>
+            </Select>
+          </StyledFormControl>
+          
+          <StyledFormControl>
+            <InputLabel id="time-label">Time Period</InputLabel>
+            <Select
+              labelId="time-label"
               id="time-dropdown"
               value={filter}
               onChange={handleFilterChange}
-              className="dropdown"
+              label="Time Period"
+              sx={{ minWidth: 140 }}
             >
-              <option value="day">Last Day</option>
-              <option value="week">Last Week</option>
-              <option value="month">Last Month</option>
-              <option value="full">All Records</option>
-            </select>
-          </div>
+              <MenuItem value="day">Last Day</MenuItem>
+              <MenuItem value="week">Last Week</MenuItem>
+              <MenuItem value="month">Last Month</MenuItem>
+              <MenuItem value="full">All Records</MenuItem>
+            </Select>
+          </StyledFormControl>
+
+          <StyledFormControl>
+            <InputLabel id="membership-year-label">Membership Year</InputLabel>
+            <Select
+              labelId="membership-year-label"
+              id="membership-year"
+              value={membershipYear}
+              onChange={handleYearChange}
+              label="Membership Year"
+              sx={{ minWidth: 140 }}
+            >
+              <MenuItem value="all">All Years</MenuItem>
+              {years.map(year => (
+                <MenuItem key={year} value={year}>{year}</MenuItem>
+              ))}
+            </Select>
+          </StyledFormControl>
         </div>
       </div>
-      <ResultsNavigator  />
+      <ResultsNavigator />
     </div>
   );
 };

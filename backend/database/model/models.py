@@ -1,7 +1,8 @@
-from sqlalchemy import Column, Float, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Float, Integer, String, Boolean, ForeignKey, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
+from typing import List
 
 Base = declarative_base()
 
@@ -25,6 +26,7 @@ class AccessLog(Base):
     SignInTimeExternal = Column(String)
     SignInTime = Column(Float)
     IsMember = Column(Boolean)
+    membershipYears = Column(JSON, nullable=False, default=list)
 
     user = relationship("User", back_populates="access_logs")
     badge_snapshot = relationship("BadgeSnapshot", back_populates="access_log")

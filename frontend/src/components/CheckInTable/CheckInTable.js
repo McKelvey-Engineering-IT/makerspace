@@ -1,9 +1,17 @@
 import React, { useContext, useEffect, useRef } from "react";
 import { AppContext } from "../../AppContext";
+import { isMemberForYear } from '../../utils/membershipUtils';
 import "./CheckInTable.css";
 
 const CheckInTable = () => {
-  const { recordsInView, selectedStudent, setSelectedStudent, newRecordsUnread, soundAlertsEnabled } = useContext(AppContext);
+  const { 
+    recordsInView, 
+    selectedStudent, 
+    setSelectedStudent, 
+    newRecordsUnread, 
+    soundAlertsEnabled, 
+    membershipYear 
+  } = useContext(AppContext);
 
   const audioRef = useRef(new Audio(process.env.PUBLIC_URL + "/alert.wav"));
 
@@ -15,11 +23,13 @@ const CheckInTable = () => {
 
   return (
     <div className="checkin-list">
-      {recordsInView.map(({ LogID, Name, Email, IsMember, SignInTime }) => (
+      {recordsInView.map(({ LogID, Name, Email, membershipYears, SignInTime }) => (
         <div
           key={LogID}
-          className={`checkin-card ${IsMember ? "member-card" : "nonmember-card"} ${newRecordsUnread.includes(LogID) ? "unread" : ""}
-                      ${selectedStudent === Email ? "selected-row" : ""}`}
+          className={`checkin-card ${
+            isMemberForYear(membershipYears, membershipYear) ? "member-card" : "nonmember-card"
+          } ${newRecordsUnread.includes(LogID) ? "unread" : ""}
+          ${selectedStudent === Email ? "selected-row" : ""}`}
           onClick={() => setSelectedStudent(Email)}
         >
           <div className="checkin-info">

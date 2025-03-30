@@ -16,7 +16,8 @@ export const AppProvider = ({ children }) => {
   const [sortType, setSortType] = useState("lastSignIn");
   const [sortedRecords, setSortedRecords] = useState([]);
   const [newRecordsUnread, setNewRecordsUnread] = useState([]);
-  const [soundAlertsEnabled, setSoundAlertsEnabled] = useState(false);  // Default to false
+  const [soundAlertsEnabled, setSoundAlertsEnabled] = useState(false);
+  const [membershipYear, setMembershipYear] = useState("2025");
 
   const updateRecordsInView = () => {
     const start = (currentPage - 1) * recordsPerPage;
@@ -67,7 +68,8 @@ export const AppProvider = ({ children }) => {
         newRecordsUnread,
         setNewRecordsUnread,
         soundAlertsEnabled,
-        setSoundAlertsEnabled
+        setSoundAlertsEnabled,
+        membershipYear, setMembershipYear
       }}
     >
       {children}

@@ -14,6 +14,7 @@ class ResponseBuilder:
             "IsMember": access_log.IsMember,
             "LastSignIn": access_log.SignInTime,
             "LogID": access_log.ID,
+            "membershipYears": access_log.membershipYears
         }
 
     def BadgeToDatabase(badge: Dict[str, Any], log_id: int) -> Dict[str, Any]:

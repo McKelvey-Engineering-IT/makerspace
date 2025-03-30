@@ -9,11 +9,12 @@ import {
   FaTools,
 } from "react-icons/fa";
 import InfoSection from "./InfoSection";
+import { isMemberForYear } from '../../utils/membershipUtils';
 
 const StudentDetail = () => {
   const [studentInfo, setStudentInfo] = useState(null);
   const [error, setError] = useState(null);
-  const { selectedStudent } = useContext(AppContext);
+  const { selectedStudent, membershipYear } = useContext(AppContext);
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -63,10 +64,10 @@ const StudentDetail = () => {
               <h3>{studentInfo.Email}</h3>
               <p
                 className={`member-status ${
-                  studentInfo.IsMember ? "member" : "non-member"
+                  isMemberForYear(studentInfo.membershipYears, membershipYear) ? "member" : "non-member"
                 }`}
               >
-                {studentInfo.IsMember ? "Member" : "Non-member"}
+                {isMemberForYear(studentInfo.membershipYears, membershipYear) ? "Member" : "Non-member"}
               </p>
             </div>
             <div className="info-block badge-section">

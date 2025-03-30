@@ -17,6 +17,7 @@ CREATE TABLE access_log (
     Email NVARCHAR(255),
     SignInTimeExternal NVARCHAR(255),
     SignInTime DECIMAL(20,6),
+    membershipYears NVARCHAR(MAX) NOT NULL DEFAULT ('[]'),
     IsMember BIT,
     FOREIGN KEY (Email) REFERENCES users(Email)
 );

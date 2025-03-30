@@ -1,13 +1,32 @@
-// ResultsNavigator.jsx
 import React, { useContext, useEffect, useRef } from "react";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
+import { FormControl, InputLabel, Select, MenuItem } from '@mui/material';
+import { styled } from '@mui/material/styles';
 import Chip from "@mui/material/Chip";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import { AppContext } from "../../AppContext";
 import "./ResultsNavigator.css";
+
+const StyledFormControl = styled(FormControl)(({ theme }) => ({
+  '& .MuiOutlinedInput-root': {
+    borderRadius: '8px',
+    transition: 'all 0.2s ease',
+    '&:hover': {
+      backgroundColor: 'rgba(0, 0, 0, 0.01)',
+    },
+  },
+  '& .MuiOutlinedInput-notchedOutline': {
+    borderColor: 'rgba(0, 0, 0, 0.15)',
+  },
+  '& .MuiSelect-select': {
+    padding: '10px 14px',
+  },
+  '& .MuiInputLabel-outlined': {
+    transform: 'translate(14px, 12px) scale(1)',
+  },
+  '& .MuiInputLabel-outlined.MuiInputLabel-shrink': {
+    transform: 'translate(14px, -6px) scale(0.75)',
+  },
+}));
 
 const ResultsNavigator = () => {
   const {
@@ -68,7 +87,7 @@ const ResultsNavigator = () => {
     <div className="records-info">
       <div className="pagination-controls">
         <div className="dropdowns">
-          <FormControl variant="outlined" className="records-per-page">
+          <StyledFormControl>
             <InputLabel id="records-per-page-label">Results</InputLabel>
             <Select
               labelId="records-per-page-label"
@@ -76,15 +95,16 @@ const ResultsNavigator = () => {
               value={recordsPerPage}
               onChange={handleRecordsPerPageChange}
               label="Results"
-              sx={{ height: 40, width: 75 }}
+              sx={{ minWidth: 100 }}
             >
               <MenuItem value={10}>10</MenuItem>
               <MenuItem value={20}>20</MenuItem>
               <MenuItem value={50}>50</MenuItem>
             </Select>
-          </FormControl>
+          </StyledFormControl>
+
           {totalPages > 1 && (
-            <FormControl variant="outlined" className="page-select-dropdown">
+            <StyledFormControl>
               <InputLabel id="page-select-label">Page</InputLabel>
               <Select
                 labelId="page-select-label"
@@ -92,7 +112,7 @@ const ResultsNavigator = () => {
                 value={currentPage}
                 onChange={handlePageChange}
                 label="Page"
-                sx={{ height: 40, width: 75 }}
+                sx={{ minWidth: 100 }}
               >
                 {pageOptions.map((page) => (
                   <MenuItem key={page} value={page}>
@@ -100,7 +120,7 @@ const ResultsNavigator = () => {
                   </MenuItem>
                 ))}
               </Select>
-            </FormControl>
+            </StyledFormControl>
           )}
         </div>
 

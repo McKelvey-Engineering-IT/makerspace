@@ -1,8 +1,9 @@
--- Recreate the users table
+-- Drop tables if they exist
 DROP TABLE IF EXISTS badge_snapshot;
 DROP TABLE IF EXISTS access_log;
 DROP TABLE IF EXISTS users;
 
+-- Recreate the users table
 CREATE TABLE users (
     Email VARCHAR(255) PRIMARY KEY,
     StudentID VARCHAR(255),
@@ -15,7 +16,8 @@ CREATE TABLE access_log (
     ID INT AUTO_INCREMENT PRIMARY KEY,
     Email VARCHAR(255),
     SignInTimeExternal VARCHAR(255),
-    SignInTime DECIMAL(20, 6),
+    SignInTime DECIMAL(20,6),
+    membershipYears JSON NOT NULL DEFAULT ('[]'),
     IsMember BOOLEAN,
     FOREIGN KEY (Email) REFERENCES users(Email)
 );

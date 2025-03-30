@@ -12,11 +12,9 @@ const InfoSection = ({ title, icon: Icon, payload, isImage, defaultCollapsed = f
     return aText.localeCompare(bText);
   });
 
-  const toggleCollapse = () => setCollapsed(!collapsed);
-
   return (
     <div className="info-section">
-      <div className="info-section-header" onClick={toggleCollapse}>
+      <div className="info-section-header" onClick={() => setCollapsed(!collapsed)}>
         <Icon className="info-icon" />
         <p>{title} ({payload.length})</p>
         <button className="collapse-toggle">{collapsed ? "+" : "-"}</button>
@@ -39,11 +37,6 @@ const InfoSection = ({ title, icon: Icon, payload, isImage, defaultCollapsed = f
                       <p className="badge-title">
                         <b>{item.Narrative_Detail}</b>
                       </p>
-                      <div className="badge-overlay">
-                        <p className="badge-text">
-                          <b>{item.Narrative_Detail}</b>
-                        </p>
-                      </div>
                     </div>
                   </div>
                 ) : (
