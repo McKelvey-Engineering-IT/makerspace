@@ -52,8 +52,8 @@
 }
 
 .badge-image {
-  width: 96px;
-  height: 96px;
+  width: 62px;
+  height: 62px;
   object-fit: contain;
   margin-bottom: 0.5rem;
   transition: transform 0.3s ease;
