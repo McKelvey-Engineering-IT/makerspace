@@ -60,10 +60,11 @@ class BadgrSession:
 
         for badge in self.session_badges:
             if badge.get('badgeclass') == self.member_badge_id:
-                year = self._extract_membership_year(badge.get('narrative', ''))
-                if year:
-                    years.add(year)
-                    self.member_status = True
+                self.member_status = True
+                
+            year = self._extract_membership_year(badge.get('narrative', ''))
+            if year:
+                years.add(year)
 
             narrative_extract = badge.get("narrative")
             if not narrative_extract:
