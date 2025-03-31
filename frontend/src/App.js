@@ -1,13 +1,14 @@
-import React, { useContext, useEffect, useRef } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import CheckInTable from "./components/CheckInTable/CheckInTable";
 import StudentDetail from "./components/StudentDetail/StudentDetail";
 import FilterBar from "./components/FilterBar/FilterBar";
 import Header from "./components/Header/Header";
-import useApi from "./hooks/useApi";
+import ErrorBanner from "./components/ErrorBanner/ErrorBanner";
 import { AppContext } from "./AppContext";
 import "./App.css";
 
 const App = () => {
+  const [error, setError] = useState(null);
   const {
     selectedStudent,
     updateTotalRecords,
@@ -18,21 +19,31 @@ const App = () => {
     setTotalRecords,
     setNewRecordsUnread,
     newRecords,
-      } = useContext(AppContext);
+  } = useContext(AppContext);
   let lastRecordSeen = null;
 
-  const { data: firstLoad } = useApi({
-    endpoint: `${process.env.REACT_APP_API_URL}/logins/historical?timeFilter=${filter}`,
-  });
-
   useEffect(() => {
-    if (!firstLoad?.data) return;
-    console.log("First load data:", firstLoad.data);
+    const fetchInitialData = async () => {
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/logins/historical?timeFilter=${filter}`
+        );
 
-    if(lastRecordSeen === null) lastRecordSeen = firstLoad.last_record;
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
-    updateTotalRecords(firstLoad.data);
-  }, [firstLoad.data]);
+        const firstLoad = await response.json();
+        if (!firstLoad?.data) return;
+
+        if (lastRecordSeen === null) lastRecordSeen = firstLoad.last_record;
+        updateTotalRecords(firstLoad.data);
+      } catch (error) {
+        console.error("Failed to fetch initial data:", error);
+        setError(new Date().toISOString());
+      }
+    };
+
+    fetchInitialData();
+  }, [filter]);
 
   useEffect(() => {
     const fetchNewLogins = async () => {
@@ -64,6 +75,7 @@ const App = () => {
         lastRecordSeen = newLogins.last_record;
       } catch (error) {
         console.error("Failed to fetch new logins:", error);
+        setError(new Date().toISOString());
       }
     };
 
@@ -71,7 +83,7 @@ const App = () => {
     const intervalId = setInterval(fetchNewLogins, 10000);
 
     return () => clearInterval(intervalId);
-  }, [firstLoad]);
+  }, [lastRecordSeen]);
 
   useEffect(() => {
     if (
@@ -91,6 +103,7 @@ const App = () => {
 
   return (
     <div className="app-container">
+      {error && <ErrorBanner timestamp={error} />}
       <Header />
       <div className="main-content">
         <div className="left-panel">
