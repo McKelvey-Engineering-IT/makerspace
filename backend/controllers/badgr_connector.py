@@ -4,12 +4,14 @@ import requests
 
 class BadgrConnector:
     def __init__(self, username, key, issuer=None):
-        self.token = self.get_token(username, key)
+        self.username = username
+        self.key = key
+        self.token = self.get_token()
         self.issuer = issuer if issuer else self.get_issuer()
 
-    def get_token(self, username: str, key: str) -> str:
+    def get_token(self) -> str:
         token_request = requests.post(
-            "https://api.badgr.io/o/token", data={"username": username, "password": key}
+            "https://api.badgr.io/o/token", data={"username": self.username, "password": self.key}
         )
         token_request_json = token_request.json()
 
