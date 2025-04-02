@@ -14,7 +14,7 @@ import { isMemberForYear } from '../../utils/membershipUtils';
 const StudentDetail = () => {
   const [studentInfo, setStudentInfo] = useState(null);
   const [error, setError] = useState(null);
-  const { selectedStudent, membershipYear } = useContext(AppContext);
+  const { selectedStudent } = useContext(AppContext);
 
   useEffect(() => {
     const fetchStudentData = async () => {
@@ -47,6 +47,21 @@ const StudentDetail = () => {
     setError(null);
   };
 
+  const renderBadgeLevels = (badges) => {
+    if (!badges || !badges.length) return null;
+    
+    return badges.map(level => (
+      <InfoSection
+        key={level.name}
+        title={level.name}
+        defaultCollapsed={!level.expanded}
+        icon={FaTools}
+        payload={level.badges || []}
+        isImage={true}
+      />
+    ));
+  };
+
   return (
     <>
       <div className="student-info-container">
@@ -62,12 +77,8 @@ const StudentDetail = () => {
               <FaUserCircle className="user-icon" />
               <h2>{studentInfo.Name}</h2>
               <h3>{studentInfo.Email}</h3>
-              <p
-                className={`member-status ${
-                  isMemberForYear(studentInfo.membershipYears, membershipYear) ? "member" : "non-member"
-                }`}
-              >
-                {isMemberForYear(studentInfo.membershipYears, membershipYear) ? "Member" : "Non-member"}
+              <p className={`member-status ${studentInfo.IsMember ? "member" : "non-member"}`}>
+                {studentInfo.IsMember ? "Member" : "Non-member"}
               </p>
             </div>
             <div className="info-block badge-section">
@@ -81,31 +92,7 @@ const StudentDetail = () => {
                 {new Date(studentInfo.LastSignIn).toLocaleString()}
               </div>
             </div>
-            <InfoSection
-              title="Trainings Completed"
-              icon={FaListAlt}
-              payload={studentInfo.trainingsCompleted || []}
-              isImage={true}
-            />
-            <InfoSection
-              title="Unicorn Badges"
-              icon={FaCrown}
-              payload={studentInfo.unicornBadges || []}
-              isImage={true}
-            />
-            <InfoSection
-              title="PowerTool Training"
-              icon={FaTools}
-              payload={studentInfo.powertoolTraining || []}
-              isImage={true}
-            />
-            <InfoSection
-              title="MakerTech Training"
-              icon={FaTools}
-              payload={studentInfo.makertechTraining || []}
-              isImage={true}
-              defaultCollapsed={true}
-            />
+            {renderBadgeLevels(studentInfo.badges)}
           </div>
         )}
       </div>

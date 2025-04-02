@@ -25,6 +25,11 @@ const StyledFormControl = styled(FormControl)(({ theme }) => ({
   '& .MuiInputLabel-outlined.MuiInputLabel-shrink': {
     transform: 'translate(14px, -6px) scale(0.75)',
   },
+  width: '180px',  // Increased from minWidth: 140
+  margin: '0 10px',  // Add some spacing between dropdowns
+  '& .MuiSelect-select': {
+    padding: '10px 14px',
+  },
 }));
 
 const FilterBar = () => {
@@ -176,7 +181,6 @@ const FilterBar = () => {
               value={sortType}
               onChange={handleSortChange}
               label="Sort by"
-              sx={{ minWidth: 140 }}
             >
               <MenuItem value="lastSignIn">Last Sign In</MenuItem>
               <MenuItem value="name">Name</MenuItem>
@@ -192,7 +196,6 @@ const FilterBar = () => {
               value={filter}
               onChange={handleFilterChange}
               label="Time Period"
-              sx={{ minWidth: 140 }}
             >
               <MenuItem value="day">Last Day</MenuItem>
               <MenuItem value="week">Last Week</MenuItem>
@@ -201,7 +204,7 @@ const FilterBar = () => {
             </Select>
           </StyledFormControl>
 
-          <StyledFormControl>
+          {/* <StyledFormControl>
             <InputLabel id="membership-year-label">Membership Year</InputLabel>
             <Select
               labelId="membership-year-label"
@@ -216,7 +219,7 @@ const FilterBar = () => {
                 <MenuItem key={year} value={year}>{year}</MenuItem>
               ))}
             </Select>
-          </StyledFormControl>
+          </StyledFormControl> */}
         </div>
       </div>
       <ResultsNavigator />

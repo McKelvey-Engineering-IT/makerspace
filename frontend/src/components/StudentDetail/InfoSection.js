@@ -13,42 +13,28 @@ const InfoSection = ({ title, icon: Icon, payload, isImage, defaultCollapsed = f
   });
 
   return (
-    <div className="info-section">
+    <div className="info-block badge-section">
       <div className="info-section-header" onClick={() => setCollapsed(!collapsed)}>
         <Icon className="info-icon" />
         <p>{title} ({payload.length})</p>
         <button className="collapse-toggle">{collapsed ? "+" : "-"}</button>
       </div>
       {!collapsed && (
-        <div className="info-section-content">
-          {Array.isArray(sortedPayload) && sortedPayload.length > 0 ? (
-            <div className="info-grid">
-              {sortedPayload.map((item, index) =>
-                isImage && item.ImageURL ? (
-                  <div key={index} className="info-item badge-hover">
-                    <div className="badge-wrapper">
-                      <img 
-                        src={item.ImageURL} 
-                        alt={item.Narrative_Detail} 
-                        height="64" 
-                        width="64" 
-                        className="badge-image"
-                      />
-                      <p className="badge-title">
-                        <b>{item.Narrative_Detail}</b>
-                      </p>
-                    </div>
-                  </div>
-                ) : (
-                  <div key={index} className="info-item text-hover">
-                    <p>{item.Narrative_Detail || `Item ${index + 1}`}</p>
-                  </div>
-                )
-              )}
+        <div className="badges">
+          {sortedPayload.map((item, index) => (
+            <div key={index} className="badge-container">
+              <div className="badge-text-static">
+              {isImage && (
+                  <img 
+                    src={item.ImageURL} 
+                    alt={item.Narrative_Title}
+                    className="badge-image"
+                  />
+                )}
+                <div className="badge-description">{item.Narrative_Detail}</div>
+              </div>
             </div>
-          ) : (
-            <p>No data available</p>
-          )}
+          ))}
         </div>
       )}
     </div>

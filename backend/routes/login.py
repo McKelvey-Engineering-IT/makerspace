@@ -95,9 +95,14 @@ async def user_login(
 
     await sql_controller.insert_user(User(**user_payload))
     session_id = await sql_controller.insert_session(AccessLog(**access_payload))
-
     badges = badgr_session.get_user_badges(session_id)
-    total_badges = badges["unicornBadges"] + badges["trainingsCompleted"] + badges['powertoolTraining'] + badges["trainingsCompleted"]
+
+    total_badges = [
+        badge 
+        for level in badges["badges"] 
+        for badge in level["badges"]
+    ]
+    
     badgr_snapshot = [BadgeSnapshot(**badge) for badge in total_badges]
 
     await sql_controller.badge_snapshot_insert(badgr_snapshot)

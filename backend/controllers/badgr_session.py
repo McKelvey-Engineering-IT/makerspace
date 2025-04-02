@@ -1,8 +1,46 @@
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple, List
 from controllers.badgr_connector import BadgrConnector
+from datetime import datetime
 
 
 class BadgrSession:
+    BADGE_LEVELS = {
+        "Red Level": {
+            "expanded": True,
+            "terms": [
+                'bantam', 'mini-mill', 'cnc',
+                'laser cut', 
+                'band saw', 'bandsaw',
+                'drill press', 'drillpress',
+                '3d scan', 'scanner'
+            ]
+        },
+        "Yellow Level": {
+            "expanded": True,
+            "terms": [
+                'cordless drill', 'drill',
+                'dremel', 
+                'jigsaw', 'jig saw',
+                'sewing', 'sew',
+                'solder',
+                'vinyl cut', 'vinylcut'
+            ]
+        },
+        "Green Level": {
+            "expanded": False,
+            "terms": [
+                '3d print', 
+                'prusa', 'slicer',
+                'preform', 'form 3',
+                'button maker', 'buttonmaker',
+                'inkscape',
+                'illustrator',
+                'heat press', 'heatpress',
+                'mug press', 'mugpress'
+            ]
+        }
+    }
+
     def __init__(self, email: str, connector: BadgrConnector, member_badge_id: str):
         self.badgr_connector = connector
         self.email = email
@@ -41,24 +79,22 @@ class BadgrSession:
         }
 
     def _categorize_badge(self, narrative: str) -> str:
-        if "unicorn" in narrative.lower():
-            return "unicornBadges"
-        elif "makertech training" in narrative.lower():
-            return "makertechTraining"
-        elif narrative.lower() in ["power tool", "powertool"]:
-            return "powertoolTraining"
-        return "trainingsCompleted"
+        narrative = narrative.lower()
+        
+        for level, config in self.BADGE_LEVELS.items():
+            if any(term in narrative for term in config["terms"]):
+                return level
+                
+        return "White Level"
 
-    def organize_badges(self, access_log_id=None) -> Dict[str, Any]:
+    def organize_badges(self, access_log_id=None) -> List[Dict[str, Any]]:
+        levels = {level: [] for level in self.BADGE_LEVELS.keys() | {"White Level"}}
         years = set()
-        badge_type = {
-            "unicornBadges": [], 
-            "trainingsCompleted": [], 
-            "powertoolTraining": [], 
-            "makertechTraining": []
-        }
+        level_narratives = {level: set() for level in levels.keys()}  # Track narratives per level
 
         for badge in self.session_badges:
+            badge_id = badge.get('id')
+            
             if badge.get('badgeclass') == self.member_badge_id:
                 self.member_status = True
                 
@@ -67,32 +103,56 @@ class BadgrSession:
                 years.add(year)
 
             narrative_extract = badge.get("narrative")
-            if not narrative_extract:
+            if not narrative_extract or "makertech" in narrative_extract.lower():
+                continue
+
+            category = self._categorize_badge(narrative_extract)
+            if narrative_extract.lower() in level_narratives[category]:
                 continue
 
             narrative = self._get_badge_narrative_title(narrative_extract)
             badge_structure = self._create_badge_structure(badge, narrative, access_log_id)
-            category = self._categorize_badge(narrative_extract)
-            badge_type[category].append(badge_structure)
+            
+            level_narratives[category].add(narrative_extract.lower())
+            levels[category].append(badge_structure)
 
         self.membership_years = sorted(list(years), reverse=True)
-        return badge_type
+        
+        levels_order = ["Red Level", "Yellow Level", "Green Level", "White Level"]
+        return sorted([{
+            "name": level,
+            "expanded": self.BADGE_LEVELS.get(level, {"expanded": False})["expanded"],
+            "badges": badges
+        } for level, badges in levels.items()], 
+        key=lambda x: levels_order.index(x["name"]))
 
     def _get_badge_narrative_title(self, narrative: str) -> Tuple[str, str]:
         if not narrative:
             narrative = "No description available"
 
-        narrative = narrative.replace(":", "")
-        
-        if "MakerTech" in narrative:
-            narrative = narrative.split("MakerTech")
-        else:
-            narrative = narrative.split("Makerspace")
+        narrative = narrative.replace(":", "").split("Makerspace")
         
         if len(narrative) > 1:
             return narrative[1], narrative[0]
         
         return narrative[0], ""
+    
+    def _system_date_membership(self) -> bool:
+        """
+        Determines if user is a current member based on system date:
+        Aug-Dec: Check against next year's membership
+        Jan-Jul: Check against current year's membership
+        """
+        current_date = datetime.now()
+        check_year = current_date.year
+        
+        if current_date.month > 7:
+            check_year += 1
+            
+        return str(check_year) in self.membership_years
 
     def get_user_badges(self, access_log_id: Optional[int] = None) -> Dict[str, Any]:
-        return {"isMember": self.member_status, **self.organize_badges(access_log_id)}
+        return {
+            "isMember": self._system_date_membership(),
+            "badges": self.organize_badges(access_log_id)
+        }

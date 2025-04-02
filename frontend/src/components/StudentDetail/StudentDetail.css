@@ -141,12 +141,86 @@ ul li {
   }
 }
 
-/* Badge Section */
-.badge-section .badges {
-  display: flex;
+/* Badge Section Layout */
+.badges {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
-  flex-wrap: wrap; /* allow badges move to next line */
-  width: 100%; /* Make sure it takes full width */
+  width: 100%;
+  padding: 10px;
+}
+
+.badge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.badge-container:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.badge-container:hover .badge-title {
+  color: #2b6cb0;  /* Highlight color on hover */
+  transition: color 0.2s ease;
+}
+
+.badge-image-wrapper {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 12px;
+}
+
+.badge-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.2s ease-in-out;
+  border-radius: 4px;
+}
+
+.badge-image:hover {
+  transform: scale(1.2);
+  z-index: 2;
+}
+
+.badge-text-static {
+  width: 100%;
+  text-align: center;
+  padding: 0 12px;
+  margin-top: 12px;
+  flex: 1;
+  padding-left: 8px;
+  /* Prevent any transform inheritance */
+  transform: none !important;
+  transition: none !important;
+}
+
+.badge-title {
+  font-weight: 800;  /* Increased from 600 */
+  color: #1a202c;    /* Darker, more prominent color */
+  margin: 8px 0 6px;
+  font-size: 1em;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;  /* Makes it more modern */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  transform: none !important;
+}
+
+.badge-description {
+  color: #4a5568;
+  font-size: 0.9em;
+  line-height: 1.6;
+  font-weight: 600;  /* Increased from 500 */
+  opacity: 1;        /* Full opacity for better contrast */
+  margin-bottom: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  transform: none !important;
 }
 
 .badge-icon {
@@ -199,6 +273,75 @@ ul li {
   background-color: #e1e8f0;
   transform: translateY(-2px);
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
+/* Badge image zoom effect */
+.badge-image-wrapper {
+  flex-shrink: 0;
+  width: 64px;
+  height: 64px;
+  position: relative;
+}
+
+.badge-image {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.2s ease-in-out;
+  border-radius: 4px;
+}
+
+.badge-image:hover {
+  transform: scale(1.2);
+  z-index: 2;
+}
+
+/* Ensure text stays stable */
+.badge-title, .badge-description {
+  transition: none;
+  position: relative;
+  z-index: 1;
+}
+
+.badge-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin: 0.5rem 0;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+  /* Changed from visible to hidden to prevent image overflow affecting layout */
+  overflow: hidden;
+  padding: 8px;
+}
+
+.badge-text-container {
+  display: none;
+  flex: 1;
+  /* Remove any transform properties */
+  transform: none !important;
+  transition: none !important;
+}
+
+.badge-title {
+  font-weight: 500;
+  margin-bottom: 4px;
+  /* Ensure text stays put */
+  transform: none !important;
+}
+
+.badge-description {
+  color: #666;
+  font-size: 0.9em;
+  /* Ensure text stays put */
+  transform: none !important;
+}
+
+.badge-text-static {
+  flex: 1;
+  transform: none !important;
 }
 
 .container-with-spinner {
