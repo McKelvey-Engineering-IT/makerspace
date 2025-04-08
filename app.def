@@ -13,16 +13,13 @@ From: python:3.11-slim
     
 
     ## BEGIN OBDC DRIVER INSTALLATION REGION ##
-    # Install necessary dependencies
-  
-    # apt-get install -y curl gnupg unixodbc unixodbc-dev ca-certificates
+    apt-get install -y curl gnupg unixodbc unixodbc-dev ca-certificates
     # Add Microsoft's repository for ODBC Driver 18 (Commented Out)
-    # curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc
-    # curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
+    curl https://packages.microsoft.com/keys/microsoft.asc | tee /etc/apt/trusted.gpg.d/microsoft.asc
+    curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/mssql-release.list
 
     # Install Microsoft ODBC Driver 18 for SQL Server (Commented Out)
-    # apt-get update
-    # ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18 mssql-tools18
     ## END OBDC DRIVER INSTALLATION REGION ##
 
     ## BEGIN FRONTEND DELIVERY REGION ##
