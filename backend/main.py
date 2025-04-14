@@ -1,5 +1,4 @@
-import os
-import logging
+import os, logging, uvicorn
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -7,10 +6,6 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.cors import CORSMiddleware
-import uvicorn
-
-from starlette.responses import FileResponse
-
 from config import Settings
 from routes.login import login_router
 
@@ -27,8 +22,8 @@ settings = Settings()
 
 def create_app() -> FastAPI:
     app = FastAPI()
-    app.include_router(login_router)
 
+    app.include_router(login_router)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
