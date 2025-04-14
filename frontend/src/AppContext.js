@@ -7,6 +7,7 @@ export const AppProvider = ({ children }) => {
   const [totalRecords, setTotalRecords] = useState([]);
   const [recordsInView, setRecordsInView] = useState([]);
   const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedLog, setSelectedLog] = useState(null);
   const [recordsPerPage, setRecordsPerPage] = useState(10);
   const [currentRecordCount, setCurrentRecordCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -69,7 +70,8 @@ export const AppProvider = ({ children }) => {
         setNewRecordsUnread,
         soundAlertsEnabled,
         setSoundAlertsEnabled,
-        membershipYear, setMembershipYear
+        membershipYear, setMembershipYear,
+        selectedLog, setSelectedLog
       }}
     >
       {children}

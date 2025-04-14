@@ -197,9 +197,9 @@ const FilterBar = () => {
               onChange={handleFilterChange}
               label="Time Period"
             >
+              <MenuItem value="30min">Last 30 Minutes</MenuItem>
+              <MenuItem value="2hr">Last 2 Hours </MenuItem>
               <MenuItem value="day">Last Day</MenuItem>
-              <MenuItem value="week">Last Week</MenuItem>
-              <MenuItem value="month">Last Month</MenuItem>
               <MenuItem value="full">All Records</MenuItem>
             </Select>
           </StyledFormControl>

@@ -61,3 +61,37 @@
   font-size: 0.8rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+
+.current-member-card {
+  border-left: 4px solid #4CAF50;
+}
+
+.expired-card {
+  border-left: 4px solid #ff9800;
+}
+
+.non-member-card {
+  border-left: 4px solid #f44336;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  font-weight: bold;
+}
+
+.status-badge.current-member {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.status-badge.expired {
+  background-color: #ff9800;
+  color: white;
+}
+
+.status-badge.non-member {
+  background-color: #f44336;
+  color: white;
+}

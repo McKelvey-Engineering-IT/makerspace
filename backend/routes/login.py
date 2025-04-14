@@ -22,19 +22,33 @@ login_router = APIRouter(prefix="/logins", tags=["Logins"])
 
 @login_router.get("/retrieve_user")
 async def user_badges(
-    email: str,
-    badgr_connect: BadgrConnector = Depends(get_badgr_connector),
+    log_id: int,
     db: AsyncSession = Depends(get_db),
     settings: Settings = Depends(get_settings)
 ) -> Dict[str, Any]:
     sql_controller = SQLController(db)
-
-    print(settings.BADGR_MAKERSPACE_MEMBER_BADGR)
-
-    badgr_session_data = BadgrSession(email, badgr_connect, settings.BADGR_MAKERSPACE_MEMBER_BADGR).get_user_badges()
-    user, session = await sql_controller.get_user_and_most_recent_session(email)
-
-    return {**badgr_session_data, **ResponseBuilder.UserBasics(user, session)}
+    
+    session = await sql_controller.find_session_by_id(log_id)
+    if not session:
+        return {"error": "Session not found"}
+    
+    badge_data = BadgrSession.format_badges(
+        [{
+            "ID": badge.ID,
+            "Narrative_Detail": badge.Narrative_Detail,
+            "Narrative_Title": badge.Narrative_Title,
+            "IssuedOn": badge.IssuedOn,
+            "CreatedAt": badge.CreatedAt,
+            "Revoked": badge.Revoked,
+            "Revocation_Reason": badge.Revocation_Reason,
+            "BadgeClass": badge.BadgeClass,
+            "ImageURL": badge.ImageURL,
+            "AccessLogID": badge.AccessLogID
+        } for badge in session.badge_snapshot],
+        settings.BADGR_MAKERSPACE_MEMBER_BADGR
+    )
+    
+    return {**badge_data, **ResponseBuilder.UserBasics(session.user, session)}
 
 
 @login_router.get("/historical")
@@ -48,6 +62,8 @@ async def historical_lookup(
         "week": timedelta(weeks=1),
         "month": timedelta(days=30),
         "full": timedelta(days=365 * 5),
+        "30min": timedelta(minutes=30),
+        "2hr": timedelta(hours=2),
     }
 
     if timeFilter not in TIME_FRAMES:
@@ -76,13 +92,17 @@ async def user_login(
     settings: Settings = Depends(get_settings)
 ) -> Dict[str, Any]:
     sql_controller = SQLController(db)
-    badgr_session = BadgrSession(login_request.Email, badgr_connect, settings.BADGR_MAKERSPACE_MEMBER_BADGR)
-
+    
+    badgr_email = await sql_controller.find_email_exception(login_request.Email)
+    lookup_email = badgr_email or login_request.Email
+    
+    badgr_session = BadgrSession(lookup_email, badgr_connect, settings.BADGR_MAKERSPACE_MEMBER_BADGR)
+    
     access_payload = {
         "Email": login_request.Email,
         "SignInTime": datetime.now().timestamp() * 1000,
         "SignInTimeExternal": login_request.SignInTime,
-        "membershipYears": badgr_session.membership_years,  # Add membership years
+        "membershipYears": badgr_session.membership_years,
         "IsMember": badgr_session.member_status,
     }
 

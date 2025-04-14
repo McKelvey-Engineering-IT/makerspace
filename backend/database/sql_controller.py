@@ -1,7 +1,7 @@
-from typing import Any, Union
+from typing import Any, Optional, Union
 from sqlalchemy import insert, select, text
 from sqlalchemy.orm import selectinload, joinedload
-from database.model.models import AccessLog, BadgeSnapshot, User
+from database.model.models import AccessLog, BadgeSnapshot, User, EmailException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -84,6 +84,20 @@ class SQLController:
 
             return result, lastEntry
 
+    async def find_session_by_id(self, log_id: int) -> AccessLog:
+        async with self.db.begin():
+            result = await self.db.execute(
+                select(AccessLog)
+                .options(
+                    joinedload(AccessLog.user),
+                    joinedload(AccessLog.badge_snapshot)
+                )
+                .filter(AccessLog.ID == log_id)
+                .distinct()
+            )
+            
+            return result.unique().scalar_one_or_none()
+
     async def insert_user(self, user: User) -> None:
         user_record, session = await self.get_user_and_most_recent_session(user.Email)
 
@@ -97,3 +111,11 @@ class SQLController:
             self.db.add_all(records)
             
             await self.db.commit()
+
+    async def find_email_exception(self, email: str) -> Optional[str]:
+        async with self.db.begin():
+            result = await self.db.execute(
+                select(EmailException.badgr_email)
+                .filter(EmailException.exception_email == email)
+            )
+            return result.scalar_one_or_none()

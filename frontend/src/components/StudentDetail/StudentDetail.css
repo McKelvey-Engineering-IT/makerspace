@@ -2,10 +2,13 @@
 .student-info-container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;  /* Changed from center to flex-start */
   min-height: 100vh;
   background-color: #f4f7fa;
-  padding: 20px;
+  padding: 40px 20px;  /* Increased top padding */
+  height: auto;  /* Changed from 100vh to auto */
+  overflow-y: auto;
+  box-sizing: border-box;
 }
 
 /* Student info card */ 
@@ -55,6 +58,21 @@
 
 .non-member {
   background-color: #dc3545;
+  color: white;
+}
+
+.member-status.current-member {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.member-status.expired {
+  background-color: #ff9800;
+  color: white;
+}
+
+.member-status.non-member {
+  background-color: #f44336;
   color: white;
 }
 
@@ -396,4 +414,26 @@ ul li {
 
 .error-popup button:hover {
   background-color: #a94442;
+}
+
+.sign-in-details {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px;
+}
+
+.sign-in-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+}
+
+.sign-in-entry p {
+  margin: 0;
+}
+
+.sign-in-entry span {
+  color: #666;
 }

@@ -10,7 +10,7 @@ import "./App.css";
 const App = () => {
   const [error, setError] = useState(null);
   const {
-    selectedStudent,
+    selectedLog,
     updateTotalRecords,
     setNewRecords,
     sortType,
@@ -112,7 +112,7 @@ const App = () => {
           <CheckInTable />
         </div>
         <div className="right-panel">
-          {selectedStudent ? (
+          {selectedLog ? (
             <StudentDetail />
           ) : (
             <p className="select-prompt">Select a member to view details</p>

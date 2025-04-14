@@ -2,6 +2,7 @@
 DROP TABLE IF EXISTS badge_snapshot;
 DROP TABLE IF EXISTS access_log;
 DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS email_exceptions;
 
 -- Recreate the users table
 CREATE TABLE users (
@@ -35,5 +36,13 @@ CREATE TABLE badge_snapshot (
     ImageURL VARCHAR(255),
     AccessLogID INT,
     FOREIGN KEY (AccessLogID) REFERENCES access_log(ID)
+);
+
+-- Create simple email exceptions table
+CREATE TABLE email_exceptions (
+    exception_email VARCHAR(255) PRIMARY KEY,
+    badgr_email VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_badgr_email (badgr_email)
 );
 

@@ -7,13 +7,23 @@ class ResponseBuilder:
         if not access_log or not user:
             return {}
 
+        # Determine membership status
+        if access_log.IsMember:
+            membership_status = "Current Member"
+        elif access_log.membershipYears:
+            membership_status = "Expired"
+        else:
+            membership_status = "Non-member"
+
         return {
             "Email": user.Email,
             "Name": f"{user.FirstName} {user.LastName}",
             "SignInTime": access_log.SignInTime,
             "IsMember": access_log.IsMember,
+            "membershipStatus": membership_status,
             "LastSignIn": access_log.SignInTime,
             "LogID": access_log.ID,
+            "AccessLogID": access_log.ID,
             "membershipYears": access_log.membershipYears
         }
 

@@ -2,10 +2,9 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import "./InfoSection.css";
 
-const InfoSection = ({ title, icon: Icon, payload, isImage, defaultCollapsed = false }) => {
+const InfoSection = ({ title, icon: Icon, payload, isImage, defaultCollapsed = false, titleBarStyle = {} }) => {
   const [collapsed, setCollapsed] = useState(defaultCollapsed || payload.length === 0);
   
-  // Sort payload alphabetically by Narrative_Detail
   const sortedPayload = [...payload].sort((a, b) => {
     const aText = a.Narrative_Detail || '';
     const bText = b.Narrative_Detail || '';
@@ -14,7 +13,11 @@ const InfoSection = ({ title, icon: Icon, payload, isImage, defaultCollapsed = f
 
   return (
     <div className="info-block badge-section">
-      <div className="info-section-header" onClick={() => setCollapsed(!collapsed)}>
+      <div 
+        className="info-section-header" 
+        onClick={() => setCollapsed(!collapsed)}
+        style={titleBarStyle}
+      >
         <Icon className="info-icon" />
         <p>{title} ({payload.length})</p>
         <button className="collapse-toggle">{collapsed ? "+" : "-"}</button>
@@ -40,5 +43,6 @@ const InfoSection = ({ title, icon: Icon, payload, isImage, defaultCollapsed = f
     </div>
   );
 };
+
 
 export default InfoSection;

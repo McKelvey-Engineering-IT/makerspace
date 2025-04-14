@@ -2,6 +2,7 @@
 IF OBJECT_ID('badge_snapshot', 'U') IS NOT NULL DROP TABLE badge_snapshot;
 IF OBJECT_ID('access_log', 'U') IS NOT NULL DROP TABLE access_log;
 IF OBJECT_ID('users', 'U') IS NOT NULL DROP TABLE users;
+IF OBJECT_ID('email_exceptions', 'U') IS NOT NULL DROP TABLE email_exceptions;
 
 -- Recreate the users table
 CREATE TABLE users (
@@ -35,4 +36,11 @@ CREATE TABLE badge_snapshot (
     ImageURL NVARCHAR(255),
     AccessLogID INT,
     FOREIGN KEY (AccessLogID) REFERENCES access_log(ID)
+);
+
+-- Create simple email exceptions table
+CREATE TABLE email_exceptions (
+    exception_email NVARCHAR(255) PRIMARY KEY,
+    badgr_email NVARCHAR(255) NOT NULL,
+    created_at DATETIME DEFAULT GETDATE()
 );

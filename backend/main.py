@@ -40,7 +40,6 @@ def create_app() -> FastAPI:
     @app.get("/sign_in", response_class=HTMLResponse)
     async def catch_all():
         index_path = os.path.join(settings.FRONTEND_BUILD_DIR, "index.html")
-        print(index_path)
 
         if not os.path.exists(index_path):
             return JSONResponse(status_code=404, content={"detail": "Frontend index.html not found."})

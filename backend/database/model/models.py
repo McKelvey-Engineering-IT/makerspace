@@ -1,8 +1,9 @@
-from sqlalchemy import Column, Float, Integer, String, Boolean, ForeignKey, JSON
+from sqlalchemy import Column, Float, Integer, String, Boolean, ForeignKey, JSON, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
 from typing import List
+from datetime import datetime, timezone
 
 Base = declarative_base()
 
@@ -47,6 +48,14 @@ class BadgeSnapshot(Base):
     AccessLogID = Column(Integer, ForeignKey("access_log.ID"))
 
     access_log = relationship("AccessLog", back_populates="badge_snapshot")
+
+
+class EmailException(Base):
+    __tablename__ = "email_exceptions"
+
+    exception_email = Column(String(255), primary_key=True)
+    badgr_email = Column(String(255), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class LoginRequest(BaseModel):
