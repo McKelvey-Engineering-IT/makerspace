@@ -75,10 +75,13 @@
 }
 
 .status-badge {
+  width: 110px; /* Added fixed width */
+  display: inline-block; /* Added to respect the width */
   padding: 4px 8px;
   border-radius: 4px;
   font-size: 0.8em;
   font-weight: bold;
+  text-align: center; /* Added to center text in fixed width */
 }
 
 .status-badge.current-member {
