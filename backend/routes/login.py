@@ -16,6 +16,7 @@ from datetime import datetime, time, timedelta
 from sqlalchemy.ext.asyncio import AsyncSession
 from controllers.badgr_session import BadgrSession
 import time
+from controllers.user_controller import UserController
 
 login_router = APIRouter(prefix="/logins", tags=["Logins"])
 
@@ -112,8 +113,15 @@ async def user_login(
         "LastName": login_request.LastName,
         "StudentID": login_request.StudentID,
     }
+    
+    if hasattr(login_request, 'School') and login_request.School:
+        user_payload["School"] = login_request.School
+    if hasattr(login_request, 'ClassLevel') and login_request.ClassLevel:
+        user_payload["ClassLevel"] = login_request.ClassLevel
 
-    await sql_controller.insert_user(User(**user_payload))
+    user_controller = UserController(sql_controller)
+    await user_controller.upsert_user(login_request)
+
     session_id = await sql_controller.insert_session(AccessLog(**access_payload))
     badges = badgr_session.get_user_badges(session_id)
 

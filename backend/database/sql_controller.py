@@ -1,5 +1,5 @@
 from typing import Any, Optional, Union
-from sqlalchemy import insert, select, text
+from sqlalchemy import insert, select, text, update
 from sqlalchemy.orm import selectinload, joinedload
 from database.model.models import AccessLog, BadgeSnapshot, User, EmailException
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -119,3 +119,20 @@ class SQLController:
                 .filter(EmailException.exception_email == email)
             )
             return result.scalar_one_or_none()
+
+    async def get_user(self, email: str):
+        result = await self.db.execute(
+            select(User).where(User.Email == email)
+        )
+        return result.scalar_one_or_none()
+
+    async def update_user(self, email: str, **fields):
+        if not fields:
+            return
+        stmt = (
+            update(User)
+            .where(User.Email == email)
+            .values(**fields)
+        )
+        await self.db.execute(stmt)
+        await self.db.commit()

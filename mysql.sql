@@ -9,7 +9,9 @@ CREATE TABLE users (
     Email VARCHAR(255) PRIMARY KEY,
     StudentID VARCHAR(255),
     FirstName VARCHAR(255),
-    LastName VARCHAR(255)
+    LastName VARCHAR(255),
+    School VARCHAR(255) NULL,    -- New column
+    ClassLevel VARCHAR(255) NULL  -- New column
 );
 
 -- Recreate the access_log table

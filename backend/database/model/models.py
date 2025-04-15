@@ -2,7 +2,7 @@ from sqlalchemy import Column, Float, Integer, String, Boolean, ForeignKey, JSON
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 from datetime import datetime, timezone
 
 Base = declarative_base()
@@ -15,6 +15,8 @@ class User(Base):
     FirstName = Column(String)
     LastName = Column(String)
     StudentID = Column(String)
+    School = Column(String, nullable=True)
+    ClassLevel = Column(String, nullable=True)
 
     access_logs = relationship("AccessLog", back_populates="user")
 
@@ -64,3 +66,5 @@ class LoginRequest(BaseModel):
     LastName: str
     SignInTime: str
     StudentID: int
+    School: Optional[str] = None
+    ClassLevel: Optional[str] = None
