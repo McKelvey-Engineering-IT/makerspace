@@ -34,7 +34,7 @@ const InfoSection = ({ title, icon: Icon, payload, isImage, defaultCollapsed = f
                     className="badge-image"
                   />
                 )}
-                <div className="badge-description">{item.Narrative_Detail}</div>
+                <div className="badge-description">{item.Narrative_Title}</div>
               </div>
             </div>
           ))}

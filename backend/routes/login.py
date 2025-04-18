@@ -105,6 +105,8 @@ async def user_login(
         "SignInTimeExternal": login_request.SignInTime,
         "membershipYears": badgr_session.membership_years,
         "IsMember": badgr_session.member_status,
+        "School": getattr(login_request, "School", None),
+        "ClassLevel": getattr(login_request, "ClassLevel", None),
     }
 
     user_payload = {
@@ -113,14 +115,6 @@ async def user_login(
         "LastName": login_request.LastName,
         "StudentID": login_request.StudentID,
     }
-    
-    if hasattr(login_request, 'School') and login_request.School:
-        user_payload["School"] = login_request.School
-    if hasattr(login_request, 'ClassLevel') and login_request.ClassLevel:
-        user_payload["ClassLevel"] = login_request.ClassLevel
-
-    user_controller = UserController(sql_controller)
-    await user_controller.upsert_user(login_request)
 
     session_id = await sql_controller.insert_session(AccessLog(**access_payload))
     badges = badgr_session.get_user_badges(session_id)

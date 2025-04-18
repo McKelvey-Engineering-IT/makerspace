@@ -163,7 +163,6 @@ const FilterBar = () => {
   return (
     <div className="filter-bar">
       <div className="filter-bar-content">
-        <div className="top-controls">
           <input
             type="text"
             className="search-box"
@@ -203,25 +202,7 @@ const FilterBar = () => {
               <MenuItem value="full">All Records</MenuItem>
             </Select>
           </StyledFormControl>
-
-          {/* <StyledFormControl>
-            <InputLabel id="membership-year-label">Membership Year</InputLabel>
-            <Select
-              labelId="membership-year-label"
-              id="membership-year"
-              value={membershipYear}
-              onChange={handleYearChange}
-              label="Membership Year"
-              sx={{ minWidth: 140 }}
-            >
-              <MenuItem value="all">All Years</MenuItem>
-              {years.map(year => (
-                <MenuItem key={year} value={year}>{year}</MenuItem>
-              ))}
-            </Select>
-          </StyledFormControl> */}
         </div>
-      </div>
       <ResultsNavigator />
     </div>
   );

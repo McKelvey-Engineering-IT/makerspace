@@ -9,9 +9,7 @@ CREATE TABLE users (
     Email VARCHAR(255) PRIMARY KEY,
     StudentID VARCHAR(255),
     FirstName VARCHAR(255),
-    LastName VARCHAR(255),
-    School VARCHAR(255) NULL,    -- New column
-    ClassLevel VARCHAR(255) NULL  -- New column
+    LastName VARCHAR(255)
 );
 
 -- Recreate the access_log table
@@ -22,6 +20,8 @@ CREATE TABLE access_log (
     SignInTime DECIMAL(20,6),
     membershipYears JSON NOT NULL DEFAULT ('[]'),
     IsMember BOOLEAN,
+    School VARCHAR(255) NULL,        -- Moved here
+    ClassLevel VARCHAR(255) NULL,    -- Moved here
     FOREIGN KEY (Email) REFERENCES users(Email)
 );
 

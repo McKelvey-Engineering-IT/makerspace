@@ -69,7 +69,7 @@ class BadgrSession:
 
         for badge in badges:
             # Handle different field names between Badgr API and DB
-            narrative = badge.get('narrative') or badge.get('Narrative_Detail', '')
+            narrative = badge.get('narrative') or badge.get('Narrative_Title', '')
             badge_class = badge.get('badgeclass') or badge.get('BadgeClass', '')
             
             if member_badge_id and badge_class == member_badge_id:
@@ -88,8 +88,8 @@ class BadgrSession:
 
             narrative_parts = BadgrSession._get_badge_narrative_title(narrative)
             badge_structure = {
-                "Narrative_Title": narrative_parts[1],
-                "Narrative_Detail": narrative_parts[0],
+                "Narrative_Title": narrative_parts[0],
+                "Narrative_Detail": narrative_parts[1],
                 "CreatedAt": badge.get("createdAt") or badge.get("CreatedAt"),
                 "IssuedOn": badge.get("issuedOn") or badge.get("IssuedOn"),
                 "Revoked": badge.get("revoked") or badge.get("Revoked", False),
@@ -156,8 +156,8 @@ class BadgrSession:
 
     def _create_badge_structure(badge: Dict[str, Any], narrative: Tuple[str, str], access_log_id: Optional[int]) -> Dict[str, Any]:
         return {
-            "Narrative_Title": narrative[1],
-            "Narrative_Detail": narrative[0],
+            "Narrative_Title": narrative[0],
+            "Narrative_Detail": narrative[1],
             "CreatedAt": badge.get("createdAt"),
             "IssuedOn": badge.get("issuedOn"),
             "Revoked": badge.get("revoked"),

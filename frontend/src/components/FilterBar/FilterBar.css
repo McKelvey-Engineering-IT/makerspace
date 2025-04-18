@@ -93,7 +93,7 @@
 .dropdown-container {
   display: flex;
   justify-content: space-between;
-  padding: 0 4px;
+  padding: 0 6px;
   gap: 24px;
   align-items: center;
 }

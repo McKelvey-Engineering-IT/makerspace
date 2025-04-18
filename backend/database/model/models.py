@@ -15,8 +15,7 @@ class User(Base):
     FirstName = Column(String)
     LastName = Column(String)
     StudentID = Column(String)
-    School = Column(String, nullable=True)
-    ClassLevel = Column(String, nullable=True)
+    # School and ClassLevel REMOVED
 
     access_logs = relationship("AccessLog", back_populates="user")
 
@@ -28,8 +27,10 @@ class AccessLog(Base):
     Email = Column(String, ForeignKey("users.Email"))
     SignInTimeExternal = Column(String)
     SignInTime = Column(Float)
-    IsMember = Column(Boolean)
     membershipYears = Column(JSON, nullable=False, default=list)
+    IsMember = Column(Boolean)
+    School = Column(String, nullable=True)        # ADDED
+    ClassLevel = Column(String, nullable=True)    # ADDED
 
     user = relationship("User", back_populates="access_logs")
     badge_snapshot = relationship("BadgeSnapshot", back_populates="access_log")
