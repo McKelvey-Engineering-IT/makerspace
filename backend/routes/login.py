@@ -116,6 +116,8 @@ async def user_login(
         "StudentID": login_request.StudentID,
     }
 
+    await sql_controller.insert_user(User(**user_payload))
+
     session_id = await sql_controller.insert_session(AccessLog(**access_payload))
     badges = badgr_session.get_user_badges(session_id)
 
