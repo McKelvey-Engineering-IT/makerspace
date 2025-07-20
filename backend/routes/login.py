@@ -33,8 +33,7 @@ async def user_badges(
     if not session:
         return {"error": "Session not found"}
     
-    badge_data = BadgrSession.format_badges(
-        [{
+    original_badge_data = [{
             "ID": badge.ID,
             "Narrative_Detail": badge.Narrative_Detail,
             "Narrative_Title": badge.Narrative_Title,
@@ -45,10 +44,13 @@ async def user_badges(
             "BadgeClass": badge.BadgeClass,
             "ImageURL": badge.ImageURL,
             "AccessLogID": badge.AccessLogID
-        } for badge in session.badge_snapshot],
-        settings.BADGR_MAKERSPACE_MEMBER_BADGR
-    )
+        } for badge in session.badge_snapshot]
     
+    badge_data = BadgrSession(
+        email=session.user.Email, 
+        connector=get_badgr_connector(),
+        badge_snapshot=original_badge_data).generate_response_format()
+
     return {**badge_data, **ResponseBuilder.UserBasics(session.user, session)}
 
 
@@ -96,8 +98,7 @@ async def user_login(
     
     badgr_email = await sql_controller.find_email_exception(login_request.Email)
     lookup_email = badgr_email or login_request.Email
-    
-    badgr_session = BadgrSession(lookup_email, badgr_connect, settings.BADGR_MAKERSPACE_MEMBER_BADGR)
+    badgr_session = BadgrSession(lookup_email, badgr_connect, preprocess=True)
     
     access_payload = {
         "Email": login_request.Email,
@@ -119,16 +120,15 @@ async def user_login(
     await sql_controller.insert_user(User(**user_payload))
 
     session_id = await sql_controller.insert_session(AccessLog(**access_payload))
-    badges = badgr_session.get_user_badges(session_id)
+    badges = badgr_session.response_format_with_session_id(session_id)
 
     total_badges = [
         badge 
         for level in badges["badges"] 
         for badge in level["badges"]
     ]
-    
-    badgr_snapshot = [BadgeSnapshot(**badge) for badge in total_badges]
 
+    badgr_snapshot = [BadgeSnapshot(**badge) for badge in total_badges]
     await sql_controller.badge_snapshot_insert(badgr_snapshot)
 
     user, log = await sql_controller.get_user_and_most_recent_session(
