@@ -84,7 +84,6 @@ class BadgrSession:
         self.badgr_connector = connector
         self.email = email
         self.session_badges = badge_snapshot or self._load_badges_from_api()
-        print(self.session_badges)
         self.member_status = False
         self.membership_years = []
 
