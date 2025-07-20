@@ -6,8 +6,7 @@ class ResponseBuilder:
     def UserBasics(user: User, access_log: AccessLog) -> Dict[str, Any]:
         if not access_log or not user:
             return {}
-
-        # Determine membership status
+        
         if access_log.IsMember:
             membership_status = "Current Member"
         elif access_log.membershipYears:

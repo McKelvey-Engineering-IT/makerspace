@@ -1,6 +1,49 @@
 import os, urllib.parse
 from pydantic import BaseModel, Field
 
+
+BADGE_LEVELS = {
+        "Red Level": {
+            "expanded": True,
+            "color": "#FF6B6B",  # Softer red
+            "terms": [
+                'Mini-Mill (CNC)',
+                'Laser Cutting',
+                'Power Tools - Band Saw',
+                'Power Tools - Drill Press',
+                '3D Scanner'
+            ]
+        },
+        "Yellow Level": {
+            "expanded": True,
+            "color": "#FFD93D",  # Warmer yellow
+            "terms": [
+                'Handheld Power Tool - Cordless Drill',
+                'Handheld Power Tool - Dremel',
+                'Handheld Power Tool - Jigsaw',
+                'Sewing',
+                'Soldering',
+                'Vinyl Cutting'
+            ]
+        },
+        "Green Level": {
+            "expanded": False,
+            "color": "#4CAF50",  # Softer green
+            "terms": [
+                '3D Printing - Know the Basics',
+                '3D Slicing with Prusa Slicer',
+                '3D Slicing with PreForm (Form 3)',
+                'Button Maker',
+                'Laser Cutting with Inkscape',
+                'Laser Cutting with Illustrator',
+                'Heat Press',
+                'Heat Press - Mini',
+                'Mug Press'
+            ]
+        }
+    }
+
+
 class Settings(BaseModel):
     MESSAGE_STREAM_DELAY: int = 10
     MESSAGE_STREAM_RETRY_TIMEOUT: int = 15000
@@ -8,8 +51,7 @@ class Settings(BaseModel):
     DB_TYPE: str = Field(default_factory=lambda: os.getenv("DB_TYPE", "MYSQL"))
     BADGR_MAKERSPACE_EMAIL: str = Field(default_factory=lambda: os.getenv('MAKERSPACE_EMAIL'))
     BADGR_MAKERSPACE_PASSWORD: str = Field(default_factory=lambda: os.getenv('MAKERSPACE_PASSWORD'))
-    BADGR_MAKERSPACE_MEMBER_BADGR: str = Field(default_factory=lambda: os.getenv('MAKERSPACE_MEMBER_BADGE'))
-    
+
     FRONTEND_BUILD_DIR: str = Field(default_factory=lambda: os.path.join("..", "frontend", "build"))
     PORT: int = Field(default=32776)
     
